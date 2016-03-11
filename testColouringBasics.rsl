@@ -1,0 +1,32 @@
+ColouringBasics
+
+scheme testColouringBasics =
+extend ColouringBasics with 
+	class
+		value 
+			P1 : Piece = "Piece 1 ",
+			P2 : Piece = "Piece 2 ",
+			P3 : Piece = "Piece 3 ",
+			P4 : Piece = "Piece 4 ",
+			r1 : Relation = {(P1,P2), (P1,P3), (P2,P4), (P3,P4)},
+			r2 : Relation = {(P1,P1), (P1,P3), (P2,P4), (P3,P4)},
+			c1 : Colouring = {{P1,P2}, {P3}},
+			c2 : Colouring = {{P1,P2}, {P3}, {P4}},
+			c3 : Colouring = {{P1,P4}, {P2}, {P3}}
+			
+		test_case 
+			[isARelation] isRelation(r1) = true,
+			[isNotRelation] isRelation(r2) = false, 
+			
+			[areNeighbours] areNb(P1, P2, r1) = true,
+			[areNotNeighbours] areNb(P1, P4, r1) = false, 
+			
+			[isInColouring] isInColouring(P1, c1) = true,
+			[isNotInColouring] isInColouring(P4, c1) = false,
+			
+			[isSameColour] isSameColour(P1, P2, c1) = true,
+			[isNotSameColour] isSameColour(P1, P3, c1) = false,
+			
+			[notCorrectedColoured] isCorrectColouring(c2, r1) = false, 
+			[correctedColoured] isCorrectColouring(c3, r1) = true
+end

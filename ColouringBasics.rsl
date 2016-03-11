@@ -1,0 +1,68 @@
+scheme  ColouringBasics =
+class
+	type 
+		Piece = Text,
+		Relation = (Piece >< Piece)-set,
+		Colour = Piece-set,
+		Colouring = Colour-set
+	    
+	value /* auxiliary functions */ 
+		
+		/*
+		 * The point is to check if a piece is in the colouring (i.e. (Piece-set)-set)
+		 */		 
+		 isInColouring : Piece >< Colouring -> Bool
+		 isInColouring(cn1, colouring) is 		 	
+		 	(exists colour : Colour :- colour isin colouring /\ (exists p1 : Piece :- p1 isin colour /\ (p1 = cn1))) 
+		
+		/* Test if a couple in the realtion have the same colouring
+		 */
+		, isSameColour : Piece >< Piece >< Colouring -> Bool
+   		isSameColour(cn1, cn2, cols) is 
+   			(exists colour1 : Colour :- colour1 isin cols /\ cn1 isin colour1 /\ 
+   				(exists colour2 : Colour :- colour2 isin cols /\ cn2 isin colour2 /\ (colour1 = colour2)))		 
+   		pre (isInColouring(cn1, cols) /\ isInColouring(cn2, cols))
+
+		
+		/* mandatory functions */ 
+		
+		
+		/* Defining that for all pieces (p1, p2) defining couple in a relation, we have p1 different from p2
+		 * The point is to check that the relation doesn't have any couple defined with the same piece.
+		 * For instance: {p1, p1}
+		 */
+		, isRelation : Relation -> Bool
+		isRelation(r) is 
+			/* p1 and p2 defined as a Piece which is part of a couple of pieces included in r */
+			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>
+				(all p2 : Piece :- p2 isin {let (p1, p2) = e in p2 end | e : Piece >< Piece :- e isin r} =>
+					((p1, p2) isin r => (p1 ~= p2))
+				)
+			)	
+		
+		/* Defining two pieces p1 and p2 as parts of a couple which belongs to r, 
+		 * then, we have the implication that if cn1 and cn2 are neighbour, they should be equal to p1 and p2.
+		 *
+		 * The point is to check that it exists (or not) two pieces (p1, p2) from the relation which are neighbours.
+		 * Then, we check if these pieces are equals cn1 and cn2.
+		 */
+		, areNb : Piece >< Piece >< Relation -> Bool
+		areNb(cn1, cn2, r) is 
+			(exists (p1, p2) : Piece >< Piece :- (p1, p2) isin r /\ ((cn1 = p1 /\ cn2 = p2) \/ (cn1 = p2 /\ cn2 = p1)))
+		pre isRelation(r) 		
+   		
+   		/* (exists (p1, p2) : Piece >< Piece :- (p1, p2) isin cols /\ ((cn1 = p1 /\ cn2 = p2) \/ (cn1 = p2 /\ cn2 = p1))) */
+		
+		/* We want to check that for all piece, if couples of neighbours have different colours
+		 * Example of colouring: {{P2,P3,P8},{P6},{P9,P4}}
+		 */ 
+    	, isCorrectColouring : Colouring >< Relation -> Bool
+   		isCorrectColouring(cols, r) is 
+   			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>
+				(all p2 : Piece :- p2 isin {let (p1, p2) = e in p2 end | e : Piece >< Piece :- e isin r} =>
+					(areNb(p1, p2, r)) => ~isSameColour(p1, p2, cols)
+				)
+			)	
+   			/* take a piece, then we take the neighbours, we look if they have the same colour */
+   		pre isRelation(r) 
+ end

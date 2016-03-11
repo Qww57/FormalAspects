@@ -1,0 +1,18 @@
+ColouringEx
+
+scheme testColouringEx =
+extend ColouringEx with 
+	class
+		value
+			P1 : Piece = "Piece 1 ",
+			P2 : Piece = "Piece 2 ",
+			P3 : Piece = "Piece 3 ",
+			P4 : Piece = "Piece 4 ",
+			r : Relation = {(P1, P2), (P2,P3), (P3, P4)},
+			c2 : Colour = {P2}, 
+			c3 : Colour = {P3, P4} 
+			
+		test_case 			
+			[NeighbourInColour] isNeighbourInColour(P1, r, c2) = true,
+			[NoNeighbourInColour] isNeighbourInColour(P1, r, c3) = false
+end
