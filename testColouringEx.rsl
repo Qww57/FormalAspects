@@ -9,10 +9,57 @@ extend ColouringEx with
 			P3 : Piece = "Piece 3 ",
 			P4 : Piece = "Piece 4 ",
 			r : Relation = {(P1, P2), (P2,P3), (P3, P4)},
-			c2 : Colour = {P2}, 
-			c3 : Colour = {P3, P4} 
-			
+			c1 : Colour = {P2}, 
+			c2 : Colour = {P3, P4},
+			colouring : Colouring = {{P1, P3}, {P2}},
+			colouring2 : Colouring = {{P1,P3}}		
+				
 		test_case 			
-			[NeighbourInColour] isNeighbourInColour(P1, r, c2) = true,
-			[NoNeighbourInColour] isNeighbourInColour(P1, r, c3) = false
+		
+			/* isInColour */
+			
+			[isInColour] /* False because P1 is not in c1 */
+				isInColour(P1, c1) = false,			
+			
+			[isInColour2] /* True because P2 is in c1 */
+				isInColour(P2, c1) = true,
+				
+			/* canAddPieceToColour */
+			
+			[canAddPieceToColour] /* False because P2 in c1 is neighbour */
+				canAddPieceToColour(P1, r, c1) = false,	
+						
+			[canAddPieceToColour2] /* False because P2 is in c1 */
+				canAddPieceToColour(P2, r, c1) = false,		
+					
+			[canAddPieceToColour3] /* Because no neighbour and P1 not in c2 */
+				canAddPieceToColour(P1, r, c2) = true,
+				
+			/* addPieceToColour */
+				
+			[addPieceToColour] /* Should return {P2} because P1 already has neighbour in c1*/
+				addPieceToColour(P1, r, c1) = {P2},			
+				
+			[addPieceToColour2] /* Should return {P2} because P2 already in c1 */
+				addPieceToColour(P2, r, c1) = {P2},		
+			
+			/* canAddPieceToOneColour */
+				
+			[canAddPieceToOneColour] /* True because P4 can be added to P2's colour */
+				canAddPieceToOneColour(P4, r, colouring) = true,			
+				
+			[canAddPieceToOneColour2] /* False because P2 cannot be with P1 and P3 */
+				canAddPieceToOneColour(P2, r, colouring2) = false,	
+			
+			/* startTreatment */
+				
+			[startTreatment] /* Should add P4 with P2 */
+				startTreatment(P4, r, colouring) = {{P1, P3}, {P2, P4}},			
+				
+			[startTreatment2] /* Should not do anything since P2 is already inside */
+				startTreatment(P2, r, colouring) = colouring,
+				
+			[startTreatment3] /* Should create a new colour for P2, colouring2 will be colouring */
+				startTreatment(P2, r, colouring2) = colouring
+
 end

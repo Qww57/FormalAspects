@@ -3,85 +3,107 @@ ColouringBasics
 scheme ColouringEx =
 extend ColouringBasics with 
 	class
-	
 		value
-		
-		
-		
-		
-		/* Is there one neighbour of the Piece that have this colour ? 
-		 * TRUE: there is at least one neighbour in the list
-		 * FALSE: there are no neighbour in the list
-		 */ 
-		isNeighbourInColour : Piece >< Relation >< Colour -> Bool
-		isNeighbourInColour(cn1, r, colour) is
-			(exists p1 : Piece :- p1 isin colour /\ areNb(p1, cn1, r)),
-		
-		/* */
-		CurrentColouring : Colour-set,
-		garbageColourSet : Colour-set,
-		 
-		isAddPieceToColour : Piece >< Relation >< Colouring -> Colouring
-		isAddPieceToColour(cn1, r, colouring) is 
-			if  
-				card CurrentColouring = 0
-			then /* add new piece to this colour set */
-				colouring union {{cn1}}
-			else /* add piece to one of the current coulours */
-				doTreatment(cn1, r, colouring)
-			end,
-		
-		/* TODO */
-		doTreatment :Piece >< Relation >< Colouring -> Colouring
-		doTreatment(cn1, r, colouring) is
-			addPieceAtRightPlace(cn1, r, colouring)
-			colouring union garbageColourSet
-			
-		/* addAtRightPlace */
-		addPieceAtRightPlace : Piece >< Relation >< Colouring -> Colouring
-		addPieceAtRightPlace(cn1, r, colouring) is 
-			if  /*Checking if the first colour of the list, has a neighbour of the piece to colour */
-				isNeighbourInColour(cn1, r, hd(colouring))
-			then /*If yes, then we cannot use this colour: we remove it and put it in the carbageColourSet */
-				colouring \ {hd(colouring)}
-				/*TODO: removeColourFromColouring(hd(colouring), colouring) */
-			else /*If no, it doesn't have any neighbour in this colour: we can add the piece to this colour */
-				replaceColour(colouring, hd(colouring), addPieceToColour(cn1, hd(colouring)))
-			end,
-		
-		/* Done */
-		addPieceToColour : Piece >< Colour -> Colour
-		addPieceToColour(cn1, colour) is 
-			colour union {cn1},
-			
-		/* Does that one work ? Does it change the order ? */
-		replaceColour : Colouring >< Colour >< Colour -> Colouring 
-		replaceColour(colouring, oldColour, newColour) is
-			(colouring \ {oldColour}) union {newColour}
-		
-		/* TODO put things in the garbage while removing them */
-		/* 
-		removeColourFromColouring : Colour >< Colouring -> Colouring
-		removeColourFromColouring(colour, colouring) is	
-			garbageColourSet union {colour} 
-			colouring \ {colour} */
-			
-		/* Miminum number of colours
+	
+		/* Check if the piece is in the colour (Piece-set) or not
 		 *
-		 * The point is to know what is the minimum number of colours needed.
-		 * It will be the numbers of max number of neighbours for one piece + 1
-		 */ 
-		/* minColourNumber : Relation -> Int
-		minColourNumber(r) is min 
-			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>
-				(all p2 : Piece :- p2 isin {let (p1, p2) = e in p2 end | e : Piece >< Piece :- e isin r} =>
-					((p1, p2) isin r => (p1 ~= p2))
-				)
-			)
-		post isCorrectColouring(cols, r) 	*/
+		 * params
+		 *		Piece - piece we want to test
+		 *		Colour - current colour we want to test
+		 *
+		 * returns 
+		 * 		TRUE - if Piece already in colour set
+		 * 		FALSE - if Piece not in color set
+		 */
+		isInColour : Piece >< Colour -> Bool
+		isInColour(cn1, colour) is 
+			cn1 isin colour,
 		
-		/* Return a correct colouring for the relation in input */
-		/* col : Relation -~-> Colouring
-		col(r) is ...,
+		/* Check if the piece can have or not the colour being tested.
+		 * We are checking if there is a neighbour of the piece in the colour, 
+		 * or if the piece is already in the colour.
+		 *
+		 * params
+		 *		Piece - piece we want to check
+		 * 		Relation - relation defining neighbourhood relations
+		 *		Colour - current colour we want to test
+		 *
+		 * returns 
+		 * 		TRUE - if Piece can be added to the colour
+		 * 		FALSE - if Piece cannot be added to the colour
+		 */ 
+		canAddPieceToColour : Piece >< Relation >< Colour -> Bool
+		canAddPieceToColour(cn1, r, colour) is
+			~((exists p1 : Piece :- p1 isin colour /\ areNb(p1, cn1, r)) 
+				\/ isInColour(cn1, colour)),
+				
+		/* Check if the piece can be added to the colors of the colouring
+		 *
+		 * params
+		 *		Piece - piece we want to check
+		 * 		Relation - relation defining neighbourhood relations
+		 *		Colouring - Colouring to test
+		 *
+		 * returns 
+		 * 		TRUE - if the piece can be added in a color of the colouring
+		 * 		FALSE - if the piece cannot be added to the colour of the colouring
+		 */ 
+		canAddPieceToOneColour : Piece >< Relation >< Colouring -> Bool
+		canAddPieceToOneColour(cn1, r, colouring) is
+			(exists colour : Colour :- colour isin colouring /\ canAddPieceToColour(cn1, r, colour)),
+	
+		/* Add a piece to the current colour
+		 *
+		 * params
+		 *		Piece - piece to add to the colour
+		 * 		Relation - relation defining neighbourhood relations
+		 *		Colour - current colour we want to add the piece
+		 *
+		 * returns
+		 * 		Colour - colour in the parameters with potentially the new piece 
+		 */
+		addPieceToColour : Piece >< Relation >< Colour -> Colour
+		addPieceToColour(cn1, r, colour) is 
+			if canAddPieceToColour(cn1, r, colour)
+			then colour union {cn1}
+			else colour
+			end,
+		
+		/* The purpose of this function is to start the treatment of the Colouring
+		 *
+		 * params
+		 *		Piece - piece to add to the colour
+		 * 		Relation - relation defining neighbourhood relations
+		 *		Colour - current colour we want to add the piece
+		 *
+		 * returns
+		 * 		Colour - colour in the parameters with potentially the new piece 
+		 */
+		startTreatment : Piece >< Relation >< Colouring -> Colouring
+		startTreatment(cn1, r, colouring) is 
+			if canAddPieceToOneColour(cn1, r, colouring) = true
+			then {addPieceToColour(cn1, r, colour) |  colour : Colour :- colour isin colouring}
+			else colouring union {{cn1}}
+			end
+			
+		
+		/* Return a correct colouring for the relation in input 
+		 *
+		 * params
+		 * 		Relation - relation defining neighbourhood relations of piece we want to colour
+		 *
+		 * returns
+		 * 		Colouring - set of colour considering neighbourhood relations
+		 *
+			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r}  => startTreatment(p1, r, CurrentColouring))
+		 
+		col : Relation -~-> 
+		col(r) is 
+			let
+				colouring : Colouring
+			in 
+				{startTreatment(p1, r, colouring) |  p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r}}
+			end
 		pre isRelation(r) */
+		
 end
