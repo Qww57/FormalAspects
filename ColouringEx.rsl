@@ -1,80 +1,62 @@
 ColouringBasics
 
+/* This class extends the ColouringBasics in order to provide a method returning a correct colouring for a given relation.
+ *
+ * TODO: add something to avoid having duplicates
+ *
+ * This class is composed of:
+ * 	- auxiliary functions for the small tasks
+ *  - treatment functions which are used recursively on Pieces, Couples of Pieces and Relations
+ *  - the main function col
+ */
+
 scheme ColouringEx =
 extend ColouringBasics with 
 	class
 		value
 		
-		tmpColour : Colouring = {{}},
-	
-		/* Check if the piece is in the colour (Piece-set) or not
+		/* Auxiliary functions */
+			
+		/* This functions checks if the piece can be added or not in the colour being tested.
+		 * We are checking if there is a neighbour of the piece in the colour and if the piece is already in the colour.
 		 *
 		 * params
-		 *		Piece - piece we want to test
-		 *		Colour - current colour we want to test
+		 *		cn1 - piece we want to check
+		 * 		r - relation defining neighbourhood relations
+		 *		colour - current colour we want to test
 		 *
 		 * returns 
-		 * 		TRUE - if Piece already in colour set
-		 * 		FALSE - if Piece not in color set
-		 */
-		isInColour : Piece >< Colour -> Bool
-		isInColour(cn1, colour) is 
-			cn1 isin colour,
-	
-		
-		/* Check if the piece can have or not the colour being tested.
-		 * We are checking if there is a neighbour of the piece in the colour, 
-		 * or if the piece is already in the colour.
-		 *
-		 * params
-		 *		Piece - piece we want to check
-		 * 		Relation - relation defining neighbourhood relations
-		 *		Colour - current colour we want to test
-		 *
-		 * returns 
-		 * 		TRUE - if Piece can be added to the colour
-		 * 		FALSE - if Piece cannot be added to the colour
+		 * 		true - if Piece can be added to the colour
+		 * 		false - if Piece cannot be added to the colour
 		 */ 
 		canAddPieceToColour : Piece >< Relation >< Colour -> Bool
 		canAddPieceToColour(cn1, r, colour) is
-			~((exists p1 : Piece :- p1 isin colour /\ areNb(p1, cn1, r))) 
-			/\ ~isInColour(cn1, colour), 
-	
-	
-		/*
-		 * true if the piece is already in one of the colour of the colouring
-		 * false if not
-		 */
-		isAlreadyInColouring : Piece >< Colouring -> Bool
-		isAlreadyInColouring(cn1, colouring) is 
-			(exists colour : Colour :- colour isin colouring /\ isInColour(cn1, colour)),
-				
-				
-		/* Check if the piece can be added to the colors of the colouring
+			~((exists p1 : Piece :- p1 isin colour /\ areNb(p1, cn1, r))) /\ ~(cn1 isin colour), 
+									
+		/* This function checks if the piece can be added to on of the existing colours of the colouring
 		 *
 		 * params
-		 *		Piece - piece we want to check
-		 * 		Relation - relation defining neighbourhood relations
-		 *		Colouring - Colouring to test
+		 *		cn1 - piece we want to check
+		 * 		r - relation defining neighbourhood relations
+		 *		colouring - Colouring to test
 		 *
 		 * returns 
-		 * 		TRUE - if the piece can be added in a color of the colouring
+		 * 		true - if the piece can be added in a color of the colouring
 		 * 		FALSE - if the piece cannot be added to the colour of the colouring
 		 */ 
 		canAddPieceToExistingColours : Piece >< Relation >< Colouring -> Bool
 		canAddPieceToExistingColours(cn1, r, colouring) is
 			(exists colour : Colour :- colour isin colouring /\ canAddPieceToColour(cn1, r, colour)),
 	
-	
-		/* Add a piece to the current colour
+		/* This function is used to add a colour to a new Colour (i.e. Piece-set)
 		 *
 		 * params
-		 *		Piece - piece to add to the colour
-		 * 		Relation - relation defining neighbourhood relations
-		 *		Colour - current colour we want to add the piece
+		 *		cn1 - piece to add to the colour
+		 * 		r - relation defining neighbourhood relations
+		 *		colour - current colour we want to add the piece
 		 *
 		 * returns
-		 * 		Colour - colour in the parameters with potentially the new piece 
+		 * 		colour - colour in the parameters with potentially the new piece 
 		 */
 		addPieceToColour : Piece >< Relation >< Colour -> Colour
 		addPieceToColour(cn1, r, colour) is 
@@ -84,65 +66,97 @@ extend ColouringBasics with
 			end,
 		
 		
-		/* The purpose of this function is to start the treatment of the Colouring
+		/* Treatment functions */
+		
+		/* This fonction shows the treatment made on a Piece that is added to the Colouring (.i.e. {Piece-set}-set)
 		 *
 		 * params
-		 *		Piece - piece to add to the colour
-		 * 		Relation - relation defining neighbourhood relations
-		 *		Colour - current colour we want to add the piece
+		 *		cn1 - piece to add to the colour
+		 * 		r - relation defining neighbourhood relations
+		 *		colouring - current colouring where we want to add the piece
 		 *
 		 * returns
-		 * 		Colour - colour in the parameters with potentially the new piece 
+		 * 		colouring - colouring from the input with potentially a new Piece 
 		 */
 		treatmentOnPiece : Piece >< Relation >< Colouring -> Colouring
 		treatmentOnPiece(cn1, r, colouring) is 
 			if canAddPieceToExistingColours(cn1, r, colouring) 
 			then {addPieceToColour(cn1, r, colour) |  colour : Colour :- colour isin colouring}
-			else elseCondition(cn1, colouring) /* PROBLEM: should be a new function checking that is not in colouring */
+			else elseCondition(cn1, colouring) 
 			end,
-			
+	
+		
+		/* This function extends the treatmentOnPiece function in the case of a Piece that cannot be added to an existing Colour (i.e. Piece-set)
+		 * This Piece should so either not be added at all (if the Piece is already in the Colouring), or should be added in a new Colour.
+		 *
+		 * params
+		 *		cn1 - Piece to add to the colouring
+		 *		colouring - Current colouring where we want to add the piece
+		 *
+		 * returns
+		 * 		colouring - Colouring from the input with potentially a new Piece 
+		 */
 		elseCondition : Piece >< Colouring -> Colouring
 		elseCondition(cn1, colouring) is
-			if ~isAlreadyInColouring(cn1, colouring)
+			if ~(exists colour : Colour :- colour isin colouring /\ cn1 isin colour)
 			then colouring union {{cn1}} 
 			else colouring
 			end,
-		
-				
+			
+		/* This fonction shows the treatment made on a couple of Pieces that should be added to the Colouring (.i.e. {Piece-set}-set)
+		 * This fonction is recursive and calls treatmentOnPiece.
+		 *
+		 * params
+		 *		couple - couple of Pieces to add to the colouring
+		 *		r - relation defining the neighborhood relationships
+		 *		colouring - Current colouring where the couple of Pieces should be added
+		 *
+		 * returns
+		 * 		colouring - Colouring from the input with potentially a new couple of Piece 
+		 */		
 		treatmentOnCouple : (Piece >< Piece) >< Relation >< Colouring -> Colouring
 		treatmentOnCouple(couple, r, colouring) is
-			let 
-				(p1, p2) = couple
-			in
-				treatmentOnPiece(p1, r, treatmentOnPiece(p2, r, colouring))
+			let (p1, p2) = couple
+			in treatmentOnPiece(p1, r, treatmentOnPiece(p2, r, colouring))
 			end,
-			
-		/* params
-		 *		relationSet - set of pieces we are working on
-		 *		r - relation defining the neighborhood relations
-		 * 		colouring - colouring we are working with
+					
+		/* This fonction shows the recursive treatment made on a relation of Pieces that should be added to the Colouring (.i.e. {Piece-set}-set)
+		 * First, we split the relation in a couple of Pieces and a tail using the hd method.
+		 * Then, we and apply the treatmentOnCouple on this couple.
+		 * Then, we apply recursively the treatmentOnRelation method on the remaining part of the relation.
+		 * This is done recursively until the relationSet is empty.
+		 * 
+		 * params
+		 *		relationSet - relation used to define the set of pieces we are working on
+		 *		r - relation defining the neighborhood relationships
+		 * 		colouring - Current colouring where the Pieces should be added
+		 *
+		 * returns 
+		 * 		colouring - Colouring from the input 
 		 */		
 		treatmentOnRelation : Relation >< Relation >< Colouring -> Colouring 
 		treatmentOnRelation(relationSet, r, colouring) is 
 			if relationSet ~= {}
-			then
-				let 
-					head = hd relationSet,
+			then let head = hd relationSet,
 					tail = relationSet \ {head}
-				in 
-					treatmentOnRelation(tail, r, treatmentOnCouple(head, r, colouring))
+				in treatmentOnRelation(tail, r, treatmentOnCouple(head, r, colouring))
 				end
-			else
-				colouring 
+			else colouring 
 			end,
-				
-		/* Return a correct colouring for the relation in input 
+			
+			
+		/* Main function */
+		
+		tmpColour : Colouring = {{}},
+						
+		/* This function returns a correct colouring for the relation in input. 
+		 * This function is calling: treatmentOnRelation and starting the use of recursive functions. 
 		 *
 		 * params
-		 * 		Relation - relation defining neighbourhood relations of piece we want to colour
+		 * 		r - relation defining neighbourhood relations of piece we want to colour
 		 *
 		 * returns
-		 * 		Colouring-infset - set of colouring considering neighbourhood relations
+		 * 		Colouring - colouring considering correctly the neighbourhood relations
 		 */
 		col : Relation -~-> Colouring	
 		col(r) is 

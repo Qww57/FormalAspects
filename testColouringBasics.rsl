@@ -12,21 +12,55 @@ extend ColouringBasics with
 			r2 : Relation = {(P1,P1), (P1,P3), (P2,P4), (P3,P4)},
 			c1 : Colouring = {{P1,P2}, {P3}},
 			c2 : Colouring = {{P1,P2}, {P3}, {P4}},
-			c3 : Colouring = {{P1,P4}, {P2}, {P3}}
+			c3 : Colouring = {{P1,P4}, {P2}, {P3}},
+			c4 : Colouring = {{P1,P4}, {P2}, {P3}, {P1}}
 			
 		test_case 
-			[isARelation] isRelation(r1) = true,
-			[isNotRelation] isRelation(r2) = false, 
+		
+			/* isRelation */
+		
+			[isARelation] 
+				isRelation(r1) = true,
+				
+			[isNotRelation] 
+				isRelation(r2) = false, 
+				
+				
+			/* areNb */
 			
-			[areNeighbours] areNb(P1, P2, r1) = true,
-			[areNotNeighbours] areNb(P1, P4, r1) = false, 
+			[areNeighbours] 
+				areNb(P1, P2, r1) = true,
+				
+			[areNotNeighbours] 
+				areNb(P1, P4, r1) = false, 
 			
-			[isInColouring] isInColouring(P1, c1) = true,
-			[isNotInColouring] isInColouring(P4, c1) = false,
 			
-			[isSameColour] isSameColour(P1, P2, c1) = true,
-			[isNotSameColour] isSameColour(P1, P3, c1) = false,
+			/* isInColouring */
 			
-			[notCorrectedColoured] isCorrectColouring(c2, r1) = false, 
-			[correctedColoured] isCorrectColouring(c3, r1) = true
+			[isInColouring] 
+				isInColouring(P1, c1) = true,
+				
+			[isNotInColouring] 
+				isInColouring(P4, c1) = false,
+				
+				
+			/* isSameColour */
+			
+			[isSameColour] 
+				isSameColour(P1, P2, c1) = true,
+				
+			[isNotSameColour] 
+				isSameColour(P1, P3, c1) = false,
+			
+			
+			/* isInColouring */
+			
+			[notCorrectedColoured] /* not corrected because P1 and P2 have the same colour */
+				isCorrectColouring(c2, r1) = false, 
+				
+			[notCorrectedColoured2] /* not corrected because P1 is two times there */
+				isCorrectColouring(c4, r1) = false,
+				
+			[correctedColoured] 
+				isCorrectColouring(c3, r1) = true
 end

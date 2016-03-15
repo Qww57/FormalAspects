@@ -11,12 +11,12 @@ class
 		/* The point is to check if a piece is in the colouring (i.e. (Piece-set)-set)
 		 *
 		 * params
-		 *		Piece - piece we want to check
-		 *		Colouring - colouring which cotaining colours (Piece-set)
+		 *		cn1 - piece we want to check
+		 *		colouring - colouring which cotaining colours (Piece-set)
 		 *
 		 * returns 
-		 * 		TRUE - if the piece is in the colour set
-		 * 		FALSE - if the piece is not in the colour set	
+		 * 		true - if the piece is in the colour set
+		 * 		false - if the piece is not in the colour set	
 		 */		 
 		 isInColouring : Piece >< Colouring -> Bool
 		 isInColouring(cn1, colouring) is 		 	
@@ -26,13 +26,13 @@ class
 		/* Test if a couple in the relation has the same colouring
 		 *
 		 * params
-		 *		Piece - first piece we want to test
-		 *		Piece - second piece we want to test
-		 *		Colouring - colouring which contains the colours
+		 *		cn1 - first piece we want to test
+		 *		cn2 - second piece we want to test
+		 *		cols - colouring which contains the colours
 		 *
 		 * returns 
-		 * 		TRUE - if Piece already in colour set
-		 * 		FALSE - if Piece not in color set		
+		 * 		true - if Piece already in colour set
+		 * 		false - if Piece not in color set		
 		 */
 		isSameColour : Piece >< Piece >< Colouring -> Bool
    		isSameColour(cn1, cn2, cols) is 
@@ -41,16 +41,16 @@ class
    		pre (isInColouring(cn1, cols) /\ isInColouring(cn2, cols)),
 		
 		
-		/* Defining that for all pieces (p1, p2) defining couple in a relation, we have p1 different from p2
-		 * The point is to check that the relation doesn't have any couple defined with the same piece.
+		/* Defining that for all pieces (p1, p2) defining couples in a relation, we have p1 different from p2.
+		 * The point is to check that the relation doesn't have any couple defined with the two times the same piece.
 		 * For instance: {p1, p1}
 		 *
 		 * params
-		 *		Relation - relation we want to test
+		 *		r - relation we want to test
 		 *
 		 * returns 
-		 * 		TRUE - if the relation is well-formated
-		 * 		FALSE - if the relation is not well-formated
+		 * 		true - if the relation is well-formated
+		 * 		false - if the relation is not well-formated
 		 */
 		isRelation : Relation -> Bool
 		isRelation(r) is 
@@ -69,13 +69,13 @@ class
 		 * Then, we check if these pieces are equals cn1 and cn2.
 		 *
 		 * params
-		 *		Piece - first piece we want to check
-		 * 		Piece - second piece we want to check
-		 *		Relation - relation where are all the neighborhoods relation are defined
+		 *		cn1 - first piece we want to check
+		 * 		cn2 - second piece we want to check
+		 *		r - relation where are all the neighborhoods relation are defined
 		 *
 		 * returns 
-		 * 		TRUE - if pieces are neighbors according to the relation
-		 * 		FALSE - if pieces are not neighbors according to the relation
+		 * 		true - if pieces are neighbors according to the relation
+		 * 		false - if pieces are not neighbors according to the relation
 		 */
 		areNb : Piece >< Piece >< Relation -> Bool
 		areNb(cn1, cn2, r) is 
@@ -85,13 +85,15 @@ class
    		
 		/* We want to check that for all piece, if couples of neighbours have different colours
 		 *
+		 * TODO: add something to check for duplicates see test "notCorrectedColoured2" 
+		 *
 		 * params
-		 *		Colouring - colouring used on the pieces
-		 *		Relation - relation defining neighborhood relations
+		 *		cols - colouring used on the pieces
+		 *		r - relation defining neighborhood relations
 		 *
 		 * returns 
-		 * 		TRUE - if colouring is done correctly
-		 * 		FALSE - if colouring is not done correctly
+		 * 		true - if colouring is done correctly
+		 * 		false - if colouring is not done correctly
 		 */ 
     	isCorrectColouring : Colouring >< Relation -> Bool
    		isCorrectColouring(cols, r) is 

@@ -9,91 +9,21 @@ extend ColouringEx with
 			P3 : Piece = "Piece 3",
 			P4 : Piece = "Piece 4",
 			P5 : Piece = "Piece 5",
-			r : Relation = {(P1, P2), (P2,P3), (P3, P4)},
-			r1 : Relation = {(P1, P2), (P2,P3), (P3, P4), (P1, P5)},
-			c1 : Colour = {P2}, 
-			c2 : Colour = {P3, P4},
-			colouring : Colouring = {{P1, P3}, {P2}},
-			colouring2 : Colouring = {{P1,P3}}		
+			P6 : Piece = "Piece 6",
+			P7 : Piece = "Piece 7",
+			P8 : Piece = "Piece 8",
+			P9 : Piece = "Piece 9",
+			
+			r : Relation = {(P1,P2), (P1,P3), (P2,P4), (P2,P5), (P3,P4), 
+							(P3,P7), (P4,P5), (P4,P6), (P4,P7), (P4,P8),
+							(P5,P6), (P6,P8), (P7,P8), (P7,P9), (P8,P9)}
 				
 		test_case 			
-		
-			/* isInColour */
-			
-			[isInColour] /* False because P1 is not in c1 */
-				isInColour(P1, c1) = false,			
-			
-			[isInColour2] /* True because P2 is in c1 */
-				isInColour(P2, c1) = true,
-				
-			/* isAlreadyInColouring */
-			[isAlreadyInColouring]
-				isAlreadyInColouring(P2, colouring) = true,
-				
-			[isAlreadyInColouring2]
-				isAlreadyInColouring(P2, colouring2) = false,
-				
-			/* canAddPieceToColour */
-			
-			[canAddPieceToColour] /* False because P2 in c1 is neighbour */
-				canAddPieceToColour(P1, r, c1) = false,	
-						
-			[canAddPieceToColour2] /* False because P2 is in c1 */
-				canAddPieceToColour(P2, r, c1) = false,		
-					
-			[canAddPieceToColour3] /* Because no neighbour and P1 not in c2 */
-				canAddPieceToColour(P1, r, c2) = true,
-				
-			/* addPieceToColour */
-				
-			[addPieceToColour] /* Should return {P2} because P1 already has neighbour in c1*/
-				addPieceToColour(P1, r, c1) = {P2},			
-				
-			[addPieceToColour2] /* Should return {P2} because P2 already in c1 */
-				addPieceToColour(P2, r, c1) = {P2},		
-			
-			/* canAddPieceToOneColour */
-				
-			[canAddPieceToExistingColours] /* True because P4 can be added to P2's colour */
-				canAddPieceToExistingColours(P4, r, colouring) = true,			
-				
-			[canAddPieceToExistingColours2] /* False because P2 cannot be with P1 and P3 */
-				canAddPieceToExistingColours(P2, r, colouring2) = false,	
-			
-			/* treatmentOnPiece */
-				
-			[treatmentOnPiece] /* Should add P4 with P2 */
-				treatmentOnPiece(P4, r, colouring) = {{P1, P3}, {P2, P4}},			
-				
-			[treatmentOnPiece2] /* Should not do anything since P2 is already inside */
-				treatmentOnPiece(P2, r, colouring) = colouring,
-				
-			[treatmentOnPiece3] /* Should create a new colour for P2, colouring2 will be colouring */
-				treatmentOnPiece(P2, r, colouring2) = colouring,
-			
-			[TESTING]
-				isAlreadyInColouring(P3, {{P1, P3}, {P2, P4}}),
-				
-			[TESTING2]
-				treatmentOnPiece(P3, r, {{P1, P3}, {P2, P4}}),
-				
-			/* treatmentOnCouple */
-				
-			[treatmentOnCouple] /* PROBLEM */
-				treatmentOnCouple((P5, P4), r1, colouring),			
-			
-			/* step by step */
-			
-			[test1] /* OK */
-				treatmentOnCouple((P1, P2), r, {{}}),			
-			
-			[test2]  /* OK */
-				treatmentOnCouple((P2, P3), r, {{P1},{P2}}),
-				
-			[test3] /* Same problem as treatment on couple */
-				treatmentOnCouple((P3, P4), r, {{P1, P3},{P2}}),
 								
-			[colSet]
-				col(r) 
+			[AssignmentExample]
+				col(r),
+				
+			[isCorrect]
+				isCorrectColouring(col(r), r) = true
 
 end
