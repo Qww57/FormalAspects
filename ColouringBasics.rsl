@@ -20,8 +20,7 @@ class
 		 */		 
 		 isInColouring : Piece >< Colouring -> Bool
 		 isInColouring(cn1, colouring) is 		 	
-		 	(exists colour : Colour :- colour isin colouring /\ (exists p1 : Piece :- p1 isin colour /\ (p1 = cn1))), 
-		
+		 	(exists colour : Colour :- colour isin colouring /\ (exists p1 : Piece :- p1 isin colour /\ (p1 = cn1))), 		
 		
 		/* Test if a couple in the relation has the same colouring
 		 *
@@ -38,8 +37,7 @@ class
    		isSameColour(cn1, cn2, cols) is 
    			(exists colour1 : Colour :- colour1 isin cols /\ cn1 isin colour1 /\ 
    				(exists colour2 : Colour :- colour2 isin cols /\ cn2 isin colour2 /\ (colour1 = colour2)))		 
-   		pre (isInColouring(cn1, cols) /\ isInColouring(cn2, cols)),
-		
+   		pre (isInColouring(cn1, cols) /\ isInColouring(cn2, cols)),		
 		
 		/* Defining that for all pieces (p1, p2) defining couples in a relation, we have p1 different from p2.
 		 * The point is to check that the relation doesn't have any couple defined with the two times the same piece.
@@ -61,7 +59,6 @@ class
 				)
 			),	
 		
-		
 		/* Defining two pieces p1 and p2 as parts of a couple which belongs to r, 
 		 * then, we have the implication that if cn1 and cn2 are neighbour, they should be equal to p1 and p2.
 		 *
@@ -81,11 +78,10 @@ class
 		areNb(cn1, cn2, r) is 
 			(exists (p1, p2) : Piece >< Piece :- (p1, p2) isin r /\ ((cn1 = p1 /\ cn2 = p2) \/ (cn1 = p2 /\ cn2 = p1)))
 		pre isRelation(r), 		
-		
    		
-		/* We want to check that for all piece, if couples of neighbours have different colours
-		 *
-		 * TODO: add something to check for duplicates see test "notCorrectedColoured2" 
+		/* A colouring is correct if:
+		 * 		- all couples of neighbours have different colours
+		 *		- all pieces of the relation are only once in the colouring
 		 *
 		 * params
 		 *		cols - colouring used on the pieces
@@ -97,10 +93,27 @@ class
 		 */ 
     	isCorrectColouring : Colouring >< Relation -> Bool
    		isCorrectColouring(cols, r) is 
+   			neighborCondition(cols, r) /\ unicityCondition(cols, r)
+   		pre isRelation(r), 
+   		
+   		neighborCondition : Colouring >< Relation -> Bool
+   		neighborCondition(cols, r) is 
    			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>
 				(all p2 : Piece :- p2 isin {let (p1, p2) = e in p2 end | e : Piece >< Piece :- e isin r} =>
-					(areNb(p1, p2, r)) => ~isSameColour(p1, p2, cols)
+					(areNb(p1, p2, r)) => ~isSameColour(p1, p2, cols) 
 				)
-			)	
-   		pre isRelation(r) 
+			),
+		
+		unicityCondition : Colouring >< Relation -> Bool
+   		unicityCondition(cols, r) is 
+   			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>
+				(all p2 : Piece :- p2 isin {let (p1, p2) = e in p2 end | e : Piece >< Piece :- e isin r} =>
+					(unicityConditionInside(cols, p1) /\ unicityConditionInside(cols, p2))
+				)
+			),
+		
+		unicityConditionInside : Colouring >< Piece -> Bool
+		unicityConditionInside(cols, cn1) is
+			~(exists colour1 : Colour :- colour1 isin cols /\ cn1 isin colour1 /\ 
+   				(exists colour2 : Colour :- colour2 isin cols /\ cn1 isin colour2 /\ (colour1 ~= colour2)))
  end

@@ -2,7 +2,7 @@ ColouringBasics
 
 /* This class extends the ColouringBasics in order to provide a method returning a correct colouring for a given relation.
  *
- * TODO: add something to avoid having duplicates
+ * TODO: add something to avoid having duplicates 
  *
  * This class is composed of:
  * 	- auxiliary functions for the small tasks
