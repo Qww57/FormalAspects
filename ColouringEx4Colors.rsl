@@ -29,11 +29,15 @@ extend ColouringBasics with
 				card reds = 0
 			then /* add new piece to reds and remove it from list of all the pieces */
 				reds union {{cn1}} /\ {cn1} \ pieces
-			else if /* make sure there are not any neighbor in the reds then add new piece to it */
-				all p1 : Piece :- p1 isin r => ~areNb(p1, cn1, r) 
-			then
-				reds union {{cn1}} /\ {cn1} \ pieces
-		end
+			else 
+				if /* make sure there are not any neighbor in the reds then add new piece to it */
+					all p1 : Piece :- p1 isin r => ~areNb(p1, cn1, r) 
+				then
+					reds union {{cn1}} /\ {cn1} \ pieces
+				else 
+					/* */
+				end
+			end,
 		
 		
 		addPieceToGreens : Piece >< Relation -> Colouring

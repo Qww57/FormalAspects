@@ -4,11 +4,13 @@ scheme testColouringEx =
 extend ColouringEx with 
 	class
 		value
-			P1 : Piece = "Piece 1 ",
-			P2 : Piece = "Piece 2 ",
-			P3 : Piece = "Piece 3 ",
-			P4 : Piece = "Piece 4 ",
+			P1 : Piece = "Piece 1",
+			P2 : Piece = "Piece 2",
+			P3 : Piece = "Piece 3",
+			P4 : Piece = "Piece 4",
+			P5 : Piece = "Piece 5",
 			r : Relation = {(P1, P2), (P2,P3), (P3, P4)},
+			r1 : Relation = {(P1, P2), (P2,P3), (P3, P4), (P1, P5)},
 			c1 : Colour = {P2}, 
 			c2 : Colour = {P3, P4},
 			colouring : Colouring = {{P1, P3}, {P2}},
@@ -23,6 +25,13 @@ extend ColouringEx with
 			
 			[isInColour2] /* True because P2 is in c1 */
 				isInColour(P2, c1) = true,
+				
+			/* isAlreadyInColouring */
+			[isAlreadyInColouring]
+				isAlreadyInColouring(P2, colouring) = true,
+				
+			[isAlreadyInColouring2]
+				isAlreadyInColouring(P2, colouring2) = false,
 				
 			/* canAddPieceToColour */
 			
@@ -45,21 +54,40 @@ extend ColouringEx with
 			
 			/* canAddPieceToOneColour */
 				
-			[canAddPieceToOneColour] /* True because P4 can be added to P2's colour */
-				canAddPieceToOneColour(P4, r, colouring) = true,			
+			[canAddPieceToExistingColours] /* True because P4 can be added to P2's colour */
+				canAddPieceToExistingColours(P4, r, colouring) = true,			
 				
-			[canAddPieceToOneColour2] /* False because P2 cannot be with P1 and P3 */
-				canAddPieceToOneColour(P2, r, colouring2) = false,	
+			[canAddPieceToExistingColours2] /* False because P2 cannot be with P1 and P3 */
+				canAddPieceToExistingColours(P2, r, colouring2) = false,	
 			
-			/* startTreatment */
+			/* treatmentOnPiece */
 				
-			[startTreatment] /* Should add P4 with P2 */
-				startTreatment(P4, r, colouring) = {{P1, P3}, {P2, P4}},			
+			[treatmentOnPiece] /* Should add P4 with P2 */
+				treatmentOnPiece(P4, r, colouring) = {{P1, P3}, {P2, P4}},			
 				
-			[startTreatment2] /* Should not do anything since P2 is already inside */
-				startTreatment(P2, r, colouring) = colouring,
+			[treatmentOnPiece2] /* Should not do anything since P2 is already inside */
+				treatmentOnPiece(P2, r, colouring) = colouring,
 				
-			[startTreatment3] /* Should create a new colour for P2, colouring2 will be colouring */
-				startTreatment(P2, r, colouring2) = colouring
+			[treatmentOnPiece3] /* Should create a new colour for P2, colouring2 will be colouring */
+				treatmentOnPiece(P2, r, colouring2) = colouring,
+				
+			/* treatmentOnCouple */
+				
+			[treatmentOnCouple] /* Should do something */
+				treatmentOnCouple((P5, P4), r, colouring),			
+			
+			/* step by step */
+			
+			[test1] /* OK */
+				treatmentOnCouple((P1, P2), r, {{}}),			
+			
+			[test2]  /* OK */
+				treatmentOnCouple((P2, P3), r, {{P1},{P2}}),
+				
+			[test3] /* Same problem as treatment on couple */
+				treatmentOnCouple((P3, P4), r, {{P1, P3},{P2}}),
+								
+			[colSet]
+				col(r) 
 
 end

@@ -4,6 +4,8 @@ scheme ColouringEx =
 extend ColouringBasics with 
 	class
 		value
+		
+		tmpColour : Colouring = {{}},
 	
 		/* Check if the piece is in the colour (Piece-set) or not
 		 *
@@ -18,6 +20,7 @@ extend ColouringBasics with
 		isInColour : Piece >< Colour -> Bool
 		isInColour(cn1, colour) is 
 			cn1 isin colour,
+	
 		
 		/* Check if the piece can have or not the colour being tested.
 		 * We are checking if there is a neighbour of the piece in the colour, 
@@ -35,7 +38,15 @@ extend ColouringBasics with
 		canAddPieceToColour : Piece >< Relation >< Colour -> Bool
 		canAddPieceToColour(cn1, r, colour) is
 			~((exists p1 : Piece :- p1 isin colour /\ areNb(p1, cn1, r)) 
-				\/ isInColour(cn1, colour)),
+				 \/ isInColour(cn1, colour)), 
+	
+		/*
+		 * true if the piece is already in one of the colour of the colouring
+		 * false if not
+		 */
+		isAlreadyInColouring : Piece >< Colouring -> Bool
+		isAlreadyInColouring(cn1, colouring) is 
+			(exists colour : Colour :- colour isin colouring /\ isInColour(cn1, colour)),
 				
 		/* Check if the piece can be added to the colors of the colouring
 		 *
@@ -48,9 +59,11 @@ extend ColouringBasics with
 		 * 		TRUE - if the piece can be added in a color of the colouring
 		 * 		FALSE - if the piece cannot be added to the colour of the colouring
 		 */ 
-		canAddPieceToOneColour : Piece >< Relation >< Colouring -> Bool
-		canAddPieceToOneColour(cn1, r, colouring) is
-			(exists colour : Colour :- colour isin colouring /\ canAddPieceToColour(cn1, r, colour)),
+		canAddPieceToExistingColours : Piece >< Relation >< Colouring -> Bool
+		canAddPieceToExistingColours(cn1, r, colouring) is
+			(exists colour : Colour :- colour isin colouring /\ canAddPieceToColour(cn1, r, colour))
+			/\ ~isAlreadyInColouring(cn1, colouring),
+	
 	
 		/* Add a piece to the current colour
 		 *
@@ -69,6 +82,7 @@ extend ColouringBasics with
 			else colour
 			end,
 		
+		
 		/* The purpose of this function is to start the treatment of the Colouring
 		 *
 		 * params
@@ -79,13 +93,13 @@ extend ColouringBasics with
 		 * returns
 		 * 		Colour - colour in the parameters with potentially the new piece 
 		 */
-		startTreatment : Piece >< Relation >< Colouring -> Colouring
-		startTreatment(cn1, r, colouring) is 
-			if canAddPieceToOneColour(cn1, r, colouring) = true
+		treatmentOnPiece : Piece >< Relation >< Colouring -> Colouring
+		treatmentOnPiece(cn1, r, colouring) is 
+			if canAddPieceToExistingColours(cn1, r, colouring) = true 
 			then {addPieceToColour(cn1, r, colour) |  colour : Colour :- colour isin colouring}
 			else colouring union {{cn1}}
-			end
-			
+			end,
+		
 		
 		/* Return a correct colouring for the relation in input 
 		 *
@@ -93,17 +107,47 @@ extend ColouringBasics with
 		 * 		Relation - relation defining neighbourhood relations of piece we want to colour
 		 *
 		 * returns
-		 * 		Colouring - set of colour considering neighbourhood relations
+		 * 		Colouring-infset - set of colouring considering neighbourhood relations
 		 *
-			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r}  => startTreatment(p1, r, CurrentColouring))
-		 
-		col : Relation -~-> 
-		col(r) is 
-			let
-				colouring : Colouring
-			in 
-				{startTreatment(p1, r, colouring) |  p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r}}
-			end
-		pre isRelation(r) */
+		 * TWO PROBLEMS:
+		 *	- Only doing the treatment for the second element of the couple in the relationship
+		 * 	- Creating a coulouring-infest instead of updating a new a tmpColour
+		 			 
+		colSet : Relation -~-> Colouring-infset
+		colSet(r) is 
+			{startTreatment(p1, r, tmpColour) union tmpColour |  p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r}}
+		pre isRelation(r), */
 		
+		treatmentOnCouple : (Piece >< Piece) >< Relation >< Colouring -> Colouring
+		treatmentOnCouple(couple, r, colouring) is
+			let 
+				(p1, p2) = couple
+			in
+				treatmentOnPiece(p1, r, treatmentOnPiece(p2, r, colouring))
+			end,
+			
+		/* params
+		 *		relationSet - set of pieces we are working on
+		 *		r - relation defining the neighborhood relations
+		 * 		colouring - colouring we are working with
+		 */		
+		treatmentOnRelation : Relation >< Relation >< Colouring -> Colouring 
+		treatmentOnRelation(relationSet, r, colouring) is 
+			if relationSet ~= {}
+			then
+				let 
+					head = hd relationSet,
+					tail = relationSet \ {head}
+				in 
+					treatmentOnRelation(tail, r, treatmentOnCouple(head, r, colouring))
+				end
+			else
+				colouring 
+			end,
+		
+		col : Relation -~-> Colouring	
+		col(r) is 
+			treatmentOnRelation(r, r, tmpColour) 
+		pre isRelation(r) 
+	
 end
