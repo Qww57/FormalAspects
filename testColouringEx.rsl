@@ -24,6 +24,14 @@ extend ColouringEx with
 				col(r),
 				
 			[isCorrect]
-				isCorrectColouring(col(r), r) = true
+				isCorrectColouring(col(r), r) = true,
+			
+			/* Trying to filter the function */
+			
+			[Test]
+				filter(treatmentOnRelation(r, r, tmpColour), r),
+				
+			[TestCheck]
+				isCorrectColouring(filter(treatmentOnRelation(r, r, tmpColour), r),r) = true
 
 end

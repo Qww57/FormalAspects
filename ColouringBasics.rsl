@@ -6,8 +6,7 @@ class
 		Colour = Piece-set,
 		Colouring = Colour-set
 	    
-	value 
-		
+	value 		
 		/* The point is to check if a piece is in the colouring (i.e. (Piece-set)-set)
 		 *
 		 * params
@@ -36,8 +35,7 @@ class
 		isSameColour : Piece >< Piece >< Colouring -> Bool
    		isSameColour(cn1, cn2, cols) is 
    			(exists colour1 : Colour :- colour1 isin cols /\ cn1 isin colour1 /\ 
-   				(exists colour2 : Colour :- colour2 isin cols /\ cn2 isin colour2 /\ (colour1 = colour2)))		 
-   		pre (isInColouring(cn1, cols) /\ isInColouring(cn2, cols)),		
+   				(exists colour2 : Colour :- colour2 isin cols /\ cn2 isin colour2 /\ (colour1 = colour2))),		 	
 		
 		/* Defining that for all pieces (p1, p2) defining couples in a relation, we have p1 different from p2.
 		 * The point is to check that the relation doesn't have any couple defined with the two times the same piece.
@@ -52,7 +50,6 @@ class
 		 */
 		isRelation : Relation -> Bool
 		isRelation(r) is 
-			/* p1 and p2 defined as a Piece which is part of a couple of pieces included in r */
 			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>
 				(all p2 : Piece :- p2 isin {let (p1, p2) = e in p2 end | e : Piece >< Piece :- e isin r} =>
 					((p1, p2) isin r => (p1 ~= p2))
@@ -81,7 +78,9 @@ class
    		
 		/* A colouring is correct if:
 		 * 		- all couples of neighbours have different colours
-		 *		- all pieces of the relation are only once in the colouring
+		 *		- all pieces of the relation are only once in the colouring 
+		 *		  since one Piece can have only one colour
+		 *		- all pieces of the relation are there once TODO
 		 *
 		 * params
 		 *		cols - colouring used on the pieces
@@ -93,8 +92,20 @@ class
 		 */ 
     	isCorrectColouring : Colouring >< Relation -> Bool
    		isCorrectColouring(cols, r) is 
-   			neighborCondition(cols, r) /\ unicityCondition(cols, r)
+   			neighborCondition(cols, r) /\ unicityCondition(cols, r) /\ exhaustivityCondition(cols, r)
    		pre isRelation(r), 
+   		
+   		/* Fonction used to check that all pieces of the realtion are in colouring */
+   		
+   		exhaustivityCondition : Colouring >< Relation -> Bool
+   		exhaustivityCondition(cols, r) is 
+   			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>
+				(all p2 : Piece :- p2 isin {let (p1, p2) = e in p2 end | e : Piece >< Piece :- e isin r} =>
+					(exists col : Colour :- col isin cols /\ p1 isin col) /\ (exists col : Colour :- col isin cols /\ p2 isin col)
+				)
+			),
+   		
+   		/* Function used to check that neighbour pieces have different colours */
    		
    		neighborCondition : Colouring >< Relation -> Bool
    		neighborCondition(cols, r) is 
@@ -104,6 +115,11 @@ class
 				)
 			),
 		
+		/* Functions used for the unicity of each Piece from the relation in the colouring 
+		 *
+		 * Unicity <=> for all pieces P in the relation, it doesn't exist any couple of colours, so that these two
+		 *			   colours are different and the piece P is in both of them.
+		 */	
 		unicityCondition : Colouring >< Relation -> Bool
    		unicityCondition(cols, r) is 
    			(all p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r} =>

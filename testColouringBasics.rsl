@@ -19,37 +19,37 @@ extend ColouringBasics with
 		
 			/* isRelation */
 		
-			[isARelation] 
+			[isARelation] /* should return true because all couples have distincts Piece */
 				isRelation(r1) = true,
 				
-			[isNotRelation] 
+			[isNotRelation] /* should return false because we have a couple (P1,P1) */
 				isRelation(r2) = false, 
 				
 				
 			/* areNb */
 			
-			[areNeighbours] 
+			[areNeighbours] /* should return true because P1 and P2 are neighbours in r1 */
 				areNb(P1, P2, r1) = true,
 				
-			[areNotNeighbours] 
+			[areNotNeighbours] /* should return false because P1 and P4 are not neighbours in r1 */
 				areNb(P1, P4, r1) = false, 
 			
 			
 			/* isInColouring */
 			
-			[isInColouring] 
+			[isInColouring] /* should return true because P1 is in C1 */
 				isInColouring(P1, c1) = true,
 				
-			[isNotInColouring] 
+			[isNotInColouring] /* should return false because P4 is not in C1 */
 				isInColouring(P4, c1) = false,
 				
 				
 			/* isSameColour */
 			
-			[isSameColour] 
+			[isSameColour] /* should return true because they have the same colour */
 				isSameColour(P1, P2, c1) = true,
 				
-			[isNotSameColour] 
+			[isNotSameColour] /* should return false because they don't have same colour */
 				isSameColour(P1, P3, c1) = false,
 			
 			
@@ -60,6 +60,9 @@ extend ColouringBasics with
 				
 			[notCorrectedColoured2] /* not corrected because P1 is two times there */
 				isCorrectColouring(c4, r1) = false,
+				
+			[notCorrectedColoured3] /* not corrected because P4 is not in the colouring */
+				isCorrectColouring(c1, r1) = false,
 				
 			[correctedColoured] 
 				isCorrectColouring(c3, r1) = true
