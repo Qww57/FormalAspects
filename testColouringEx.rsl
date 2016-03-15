@@ -70,11 +70,17 @@ extend ColouringEx with
 				
 			[treatmentOnPiece3] /* Should create a new colour for P2, colouring2 will be colouring */
 				treatmentOnPiece(P2, r, colouring2) = colouring,
+			
+			[TESTING]
+				isAlreadyInColouring(P3, {{P1, P3}, {P2, P4}}),
+				
+			[TESTING2]
+				treatmentOnPiece(P3, r, {{P1, P3}, {P2, P4}}),
 				
 			/* treatmentOnCouple */
 				
-			[treatmentOnCouple] /* Should do something */
-				treatmentOnCouple((P5, P4), r, colouring),			
+			[treatmentOnCouple] /* PROBLEM */
+				treatmentOnCouple((P5, P4), r1, colouring),			
 			
 			/* step by step */
 			

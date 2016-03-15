@@ -37,8 +37,9 @@ extend ColouringBasics with
 		 */ 
 		canAddPieceToColour : Piece >< Relation >< Colour -> Bool
 		canAddPieceToColour(cn1, r, colour) is
-			~((exists p1 : Piece :- p1 isin colour /\ areNb(p1, cn1, r)) 
-				 \/ isInColour(cn1, colour)), 
+			~((exists p1 : Piece :- p1 isin colour /\ areNb(p1, cn1, r))) 
+			/\ ~isInColour(cn1, colour), 
+	
 	
 		/*
 		 * true if the piece is already in one of the colour of the colouring
@@ -47,6 +48,7 @@ extend ColouringBasics with
 		isAlreadyInColouring : Piece >< Colouring -> Bool
 		isAlreadyInColouring(cn1, colouring) is 
 			(exists colour : Colour :- colour isin colouring /\ isInColour(cn1, colour)),
+				
 				
 		/* Check if the piece can be added to the colors of the colouring
 		 *
@@ -61,8 +63,7 @@ extend ColouringBasics with
 		 */ 
 		canAddPieceToExistingColours : Piece >< Relation >< Colouring -> Bool
 		canAddPieceToExistingColours(cn1, r, colouring) is
-			(exists colour : Colour :- colour isin colouring /\ canAddPieceToColour(cn1, r, colour))
-			/\ ~isAlreadyInColouring(cn1, colouring),
+			(exists colour : Colour :- colour isin colouring /\ canAddPieceToColour(cn1, r, colour)),
 	
 	
 		/* Add a piece to the current colour
@@ -77,7 +78,7 @@ extend ColouringBasics with
 		 */
 		addPieceToColour : Piece >< Relation >< Colour -> Colour
 		addPieceToColour(cn1, r, colour) is 
-			if canAddPieceToColour(cn1, r, colour)
+			if canAddPieceToColour(cn1, r, colour) 
 			then colour union {cn1}
 			else colour
 			end,
@@ -95,29 +96,19 @@ extend ColouringBasics with
 		 */
 		treatmentOnPiece : Piece >< Relation >< Colouring -> Colouring
 		treatmentOnPiece(cn1, r, colouring) is 
-			if canAddPieceToExistingColours(cn1, r, colouring) = true 
+			if canAddPieceToExistingColours(cn1, r, colouring) 
 			then {addPieceToColour(cn1, r, colour) |  colour : Colour :- colour isin colouring}
-			else colouring union {{cn1}}
+			else elseCondition(cn1, colouring) /* PROBLEM: should be a new function checking that is not in colouring */
+			end,
+			
+		elseCondition : Piece >< Colouring -> Colouring
+		elseCondition(cn1, colouring) is
+			if ~isAlreadyInColouring(cn1, colouring)
+			then colouring union {{cn1}} 
+			else colouring
 			end,
 		
-		
-		/* Return a correct colouring for the relation in input 
-		 *
-		 * params
-		 * 		Relation - relation defining neighbourhood relations of piece we want to colour
-		 *
-		 * returns
-		 * 		Colouring-infset - set of colouring considering neighbourhood relations
-		 *
-		 * TWO PROBLEMS:
-		 *	- Only doing the treatment for the second element of the couple in the relationship
-		 * 	- Creating a coulouring-infest instead of updating a new a tmpColour
-		 			 
-		colSet : Relation -~-> Colouring-infset
-		colSet(r) is 
-			{startTreatment(p1, r, tmpColour) union tmpColour |  p1 : Piece :- p1 isin {let (p1, p2) = e in p1 end | e : Piece >< Piece :- e isin r}}
-		pre isRelation(r), */
-		
+				
 		treatmentOnCouple : (Piece >< Piece) >< Relation >< Colouring -> Colouring
 		treatmentOnCouple(couple, r, colouring) is
 			let 
@@ -144,7 +135,15 @@ extend ColouringBasics with
 			else
 				colouring 
 			end,
-		
+				
+		/* Return a correct colouring for the relation in input 
+		 *
+		 * params
+		 * 		Relation - relation defining neighbourhood relations of piece we want to colour
+		 *
+		 * returns
+		 * 		Colouring-infset - set of colouring considering neighbourhood relations
+		 */
 		col : Relation -~-> Colouring	
 		col(r) is 
 			treatmentOnRelation(r, r, tmpColour) 
