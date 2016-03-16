@@ -2,8 +2,6 @@ ColouringBasics
 
 /* This class extends the ColouringBasics in order to provide a method returning a correct colouring for a given relation.
  *
- * TODO: add something to avoid having duplicates 
- *
  * This class is composed of:
  * 	- auxiliary functions for the small tasks
  *  - treatment functions which are used recursively on Pieces, Couples of Pieces and Relations
@@ -42,7 +40,7 @@ extend ColouringBasics with
 		 *
 		 * returns 
 		 * 		true - if the piece can be added in a color of the colouring
-		 * 		FALSE - if the piece cannot be added to the colour of the colouring
+		 * 		false - if the piece cannot be added to the colour of the colouring
 		 */ 
 		canAddPieceToExistingColours : Piece >< Relation >< Colouring -> Bool
 		canAddPieceToExistingColours(cn1, r, colouring) is
@@ -85,9 +83,13 @@ extend ColouringBasics with
 		treatmentOnPiece : Piece >< Relation >< Colouring -> Colouring
 		treatmentOnPiece(cn1, r, colouring) is 
 			if canAddPieceToExistingColours(cn1, r, colouring) 
-			then {addPieceToColour(cn1, r, colour, colouring) |  colour : Colour :- colour isin colouring /\  ~pieceInColouring(cn1, colouring)}  
-			/* PROBLEM HERE I THINK BECAUSE THE COLOURING IS NOT REFRESHED AND IT THE PIECE IS SO ADDED IN ALL THE POSSIBLE 
-			   COLOURS AND NOT ONLY ONCE */
+			then 
+				let colour = hd { c |  c : Colour :- c isin colouring /\ canAddPieceToColour(cn1, r, c)},
+					colouring = colouring \ {colour},
+					colouring = colouring union {addPieceToColour(cn1, r, colour, colouring)}
+				in
+					colouring
+				end
 			else elseCondition(cn1, colouring) 
 			end,
 	
@@ -167,37 +169,6 @@ extend ColouringBasics with
 		col : Relation -~-> Colouring	
 		col(r) is 
 			treatmentOnRelation(r, r, tmpColour)
-		pre isRelation(r),
-					
-		filterPiece : Piece >< Colour >< Colouring -> Colouring
-		filterPiece(p, colour, colouring) is
-			if (exists col : Colour :- col isin colouring /\ col ~= colour)
-			then { col \ {p} | col : Colour :- col isin colouring /\ col ~= colour}
-			else colouring 
-			end,
-		
-		filterColour : Colour >< Colouring -> Colouring
-		filterColour(colour, colouring) is
-			if (exists p : Piece :- p isin colour /\ (exists colour2 : Colour :- colour2 isin colouring /\ p isin colour2))
-			then let piece = hd colour, tailPieces = colour \ {piece}
-				in filterPiece(piece, colour, colouring)
-				end
-			else colouring 
-			end,
-		
-		filterColouring : Colouring -> Colouring
-		filterColouring(colouring) is
-			if (colouring ~= {}) 
-			then let headColour = hd colouring, tailColours = colouring \ {headColour}
-				in filterColour(headColour, tailColours)
-				end
-			else colouring
-			end,	
-				
-		filter : Colouring >< Relation -> Colouring
-		filter(colouring, r) is
-			if unicityCondition(colouring, r)
-			then colouring
-			else filterColouring(colouring)
-			end
+		pre isRelation(r)
+			
 end

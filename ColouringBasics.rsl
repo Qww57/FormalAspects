@@ -95,7 +95,7 @@ class
    			neighborCondition(cols, r) /\ unicityCondition(cols, r) /\ exhaustivityCondition(cols, r)
    		pre isRelation(r), 
    		
-   		/* Fonction used to check that all pieces of the realtion are in colouring */
+   		/* Fonction used to check that all pieces of the relation are in colouring */
    		
    		exhaustivityCondition : Colouring >< Relation -> Bool
    		exhaustivityCondition(cols, r) is 
@@ -115,10 +115,10 @@ class
 				)
 			),
 		
-		/* Functions used for the unicity of each Piece from the relation in the colouring 
-		 *
-		 * Unicity <=> for all pieces P in the relation, it doesn't exist any couple of colours, so that these two
-		 *			   colours are different and the piece P is in both of them.
+		/* Functions used for the unicity of each Piece from the relation in the colouring */
+		
+		/* Unicity is proved by showing that for all pieces P in the relation, it doesn't exist any couple of colours (c1, c2), 
+		 * so that c1 and c2 are different and the piece P is in both of them.
 		 */	
 		unicityCondition : Colouring >< Relation -> Bool
    		unicityCondition(cols, r) is 
@@ -128,8 +128,11 @@ class
 				)
 			),
 		
+		/* Function used to prove that the piece cn1 is only in one colour of the colouring.
+		 */
 		unicityConditionInside : Colouring >< Piece -> Bool
 		unicityConditionInside(cols, cn1) is
 			~(exists colour1 : Colour :- colour1 isin cols /\ cn1 isin colour1 /\ 
    				(exists colour2 : Colour :- colour2 isin cols /\ cn1 isin colour2 /\ (colour1 ~= colour2)))
+   				
  end

@@ -1,5 +1,7 @@
 ColouringBasics
 
+/* This class extends the class ColouringBasics in order to provide unit tests for all functions. */
+ 
 scheme testColouringBasics =
 extend ColouringBasics with 
 	class
@@ -66,4 +68,5 @@ extend ColouringBasics with
 				
 			[correctedColoured] 
 				isCorrectColouring(c3, r1) = true
+				
 end

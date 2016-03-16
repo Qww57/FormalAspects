@@ -1,5 +1,7 @@
 ColouringEx
 
+/* This class extends the class ColouringEx in order to perform unit tests on all auxiliary functions used for the colouring algorithm. */
+
 scheme testColouringExAuxiliaryFunctions =
 extend ColouringEx with 
 	class
@@ -32,10 +34,13 @@ extend ColouringEx with
 			/* addPieceToColour */
 				
 			[addPieceToColour] /* Should return {P2} because P1 already has neighbour in c1*/
-				addPieceToColour(P1, r, c1) = {P2},			
+				addPieceToColour(P1, r, c1, colouring) = {P2},			
 				
 			[addPieceToColour2] /* Should return {P2} because P2 already in c1 */
-				addPieceToColour(P2, r, c1) = {P2},		
+				addPieceToColour(P2, r, c1, colouring) = {P2},
+				
+			[addPieceToColour3] /* Should return {P2, P4} because P4 is added in c1 */
+				addPieceToColour(P4, r, c1, colouring) = {P2, P4},			
 			
 			/* canAddPieceToOneColour */
 				
@@ -58,6 +63,10 @@ extend ColouringEx with
 			
 			[treatmentOnPiece4] /* Should not change anything */
 				treatmentOnPiece(P3, r, {{P1, P3}, {P2, P4}}) = {{P1, P3}, {P2, P4}},
+			
+			[treatmentOnPiece5] /* Should add P3 with P1 or with P5 */
+				treatmentOnPiece(P3, r1, {{P2, P4}, {P1}, {P5}}),
+				/* FAILING HERE, P3 is added with P1 and with P5 and not only once */
 				
 			/* treatmentOnCouple */
 				
@@ -71,9 +80,6 @@ extend ColouringEx with
 				treatmentOnCouple((P2, P3), r, {{P1},{P2}}),
 				
 			[treatmentOnCouple3] /* Should add P4 into the colour of P2 */
-				treatmentOnCouple((P3, P4), r, {{P1, P3},{P2}}),
+				treatmentOnCouple((P3, P4), r, {{P1, P3},{P2}})
 								
-			[colSet]
-				col(r) 
-
 end
