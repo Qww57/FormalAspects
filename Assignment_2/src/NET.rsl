@@ -184,19 +184,26 @@ class
 	   	validateStops : Net -> Bool
 		validateStops(net) is
 	  		~(exists s : Stop :- s isin Stops(net) /\ stopCapacity(s) < 1),
+	   	
+	    -- 3) There is at most one connection between two stops
+	    unicityNetConnections : Net -> Bool 
+	    unicityNetConnections(net) is 
+	    	~(exists c1 : Connection :- c1 isin Connections(net) /\ 
+	    		(exists c2 : Connection :- c2 isin Connections(net) /\
+	    			Stops(c1) = Stops(c2) /\ c1 ~= c2)),
 	   			
-	    -- 3) All connections should have exactly two stops in their stop-set
+	    -- 4) All connections should have exactly two stops in their stop-set
 	    connectionStops : Net -> Bool
 	    connectionStops(net) is 
 	   		~(exists c : Connection :- c isin Connections(net) /\ card Stops(c) ~= 2),
-	   	
-	   	-- 4) Validity of the parameters of the connections	
+	    
+	   	-- 5) Validity of the parameters of the connections	
 		validateConnections : Net -> Bool
 	 	validateConnections(net) is
 	  		~(exists c : Connection :- c isin Connections(net) /\ 
 	  			(capacity(c) < 1 \/ headway(c) < 1 \/ drivingTime(c) < 1)),
 	  			
-	  	-- 5) All stops of the net are least used once in a connection
+	  	-- 6) All stops of the net are least used once in a connection
 	    usageStops : Net -> Bool
 	    usageStops(net) is
 	     	~(exists s : Stop :- s isin Stops(net) /\ ~stopUsed(s, net)),
@@ -205,20 +212,13 @@ class
 	    stopUsed(s, net) is
 	    	(exists c : Connection :- c isin Connections(net) /\ (s isin Stops(c))),
 	    	
-	    -- 6) All stops used in connections are defined in the net stops
+	    -- 7) All stops used in connections are defined in the net stops
 	    usageConnections : Net -> Bool 
 	    usageConnections(net) is
 	    	~(exists c : Connection :- c isin Connections(net) /\ ~connectionUsed(c, net)),
 	    
 	    connectionUsed : Connection >< Net -> Bool 
 	    connectionUsed(c, net) is
-	    	~(exists s : Stop :- s isin Stops(c) /\ (s isin Stops(net)) = false),
-	    	
-	    -- 7) There is at most one connection between two stops
-	    unicityNetConnections : Net -> Bool 
-	    unicityNetConnections(net) is 
-	    	~(exists c1 : Connection :- c1 isin Connections(net) /\ 
-	    		(exists c2 : Connection :- c2 isin Connections(net) /\
-	    			Stops(c1) = Stops(c2) /\ c1 ~= c2))
+	    	~(exists s : Stop :- s isin Stops(c) /\ (s isin Stops(net)) = false)
 	    		    
 end  
