@@ -1,0 +1,5 @@
+*.project
+Assignment_2/src/Net.rsl.el
+*.sml
+Colouring/ColouringBasics.rsl.el
+*.el

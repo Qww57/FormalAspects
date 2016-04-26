@@ -1,0 +1,137 @@
+scheme NET =
+class
+ 	type 
+  		/* Net type */
+  	
+  		Net :: Stops : Stop-set <-> new_stops
+    	   	   Connections : Connection-set <-> new_connections,
+    	   
+   		/* Auxiliary types */
+   	
+    	Stop :: stopId : StopId
+    			stopCapacity : Capacity,
+    		
+    	Connection :: capacity : Capacity
+    			  drivingTime : DrivingTime
+    			  headway : Headway
+    			  Stops : Stop-set,
+    
+	    /* Simple predefined types */
+	    
+	    Headway = Time, -- minimum headways
+	    DrivingTime = Time, -- minimum driving times
+	    Time = Nat, -- times in number of minutes
+	    Capacity = Nat, -- capacities
+	    StopId = Text  -- names of stops
+    
+  	value 
+  
+		/* generators */
+	  
+	    -- empty :  Net = ... ,  -- the empty net
+	
+	    -- insert a stop with a given name and capacity 
+	    insertStop : StopId >< Capacity >< Net -> Net
+	    insertStop(id, cap, net) is
+	    	if (isIn(id, net) = false)
+			then new_stops(Stops(net) union {mk_Stop(id, cap)}, net)
+			else net
+			end,
+				
+	    -- add a connection between given stops, 
+	    -- with the given capacity, minimum driving time and minimum headway
+	    addConnection : StopId >< StopId  >< Headway >< Capacity >< DrivingTime >< Net -> Net
+	    addConnection(id1, id2, hw, cap, dt, net) is
+	    	if (areDirectlyConnected(id1, id2, net) = false)
+	    	then new_connections(
+	    			Connections(net) union 
+	    				{mk_Connection(cap, dt, hw,{getStop(id1, Stops(net)), getStop(id2, Stops(net))})}
+					, net)
+    		else net
+    		end
+    
+  	value 
+  
+	  	/* observers */
+	   
+	    -- check whether a stop is in a network     
+	    isIn : StopId >< Net -> Bool
+	    isIn(id, net) is
+	    	(exists s : Stop :- s isin Stops(net) /\ stopId(s) = id),
+	 
+	    -- check whether two stops are directly connected in a network        
+	    areDirectlyConnected : StopId >< StopId >< Net -> Bool
+	    areDirectlyConnected(id1, id2, net) is
+	    	(exists c : Connection :-  c isin Connections(net) /\ areConnectedBy(id1, id2, c)), 		
+	    	
+	    -- get minimum driving time between two connected stops        
+	    minHeadway : StopId >< StopId >< Net -~-> Headway
+	    minHeadway(id1, id2, net) is
+	    	if areDirectlyConnected(id1, id2, net)
+	    	then headway(getConnection(id1, id2, Connections(net)))
+	    	else 0
+	    	end,	    
+	
+	    -- get minimum driving time between two connected stops        
+	    minDrivingTime : StopId >< StopId >< Net -~-> DrivingTime
+	    minDrivingTime(id1, id2, net) is
+	    	if areDirectlyConnected(id1, id2, net)
+	    	then drivingTime(getConnection(id1, id2, Connections(net)))
+	    	else 0
+	    	end, 
+	
+	    -- get the capacity for a connection between two connected stops
+	    capacity : StopId >< StopId >< Net -~-> Capacity
+	   	capacity(id1, id2, net) is
+	    	if areDirectlyConnected(id1, id2, net)
+	    	then capacity(getConnection(id1, id2, Connections(net)))
+	    	else 0
+	    	end, 
+	 
+	    -- get the capacity of a stop 
+	    capacity : StopId >< Net -~-> Capacity
+	    capacity(id, net) is 
+	    	if isIn(id, net) 
+	    	then stopCapacity(getStop(id, Stops(net)))
+	    	else 0
+	    	end,
+	    
+	    /* Auxiliary functions for Observers and  Generators */
+	    
+	    getConnection : StopId >< StopId >< Connection-set -~-> Connection
+	    getConnection(id1, id2, connections) is 
+	    	let head = hd connections,
+	    		tail = connections \ {head} 		
+	    	in
+	    		if areConnectedBy(id1, id2, head)
+	    		then head 
+	    		else getConnection(id1, id2, tail)
+	    		end
+	    	end,
+	    	
+	   	areConnectedBy : StopId >< StopId >< Connection -> Bool
+	    areConnectedBy(id1, id2, connection) is
+	   		(exists s1 : Stop :- s1 isin Stops(connection) /\ stopId(s1) = id1 /\
+	  			(exists s2 : Stop :- s2 isin Stops(connection) /\ stopId(s2) = id2 
+	  				/\ s1 ~= s2 
+	  			 )
+	  		 ), 
+	   	
+	   	getStop : StopId >< Stop-set -~-> Stop
+	    getStop(id, stops) is 
+	    	let head = hd stops,
+	    		tail = stops \ {head}  		
+	    	in
+	    		if stopId(head) = id
+	    		then head 
+	    		else getStop(id, tail)
+	    		end
+	    	end
+	   
+  -- value 
+  
+	  	/* predicates to check nets */
+	  	
+	   /*  isWellformed : Net -> Bool
+	    isWellformed(n) is ... */  
+end  
