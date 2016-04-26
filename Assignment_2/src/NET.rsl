@@ -1,7 +1,6 @@
 scheme NET =
 class
- 	type 
-  		/* Net type */
+ 	type /* Net type */
   	
   		Net :: Stops : Stop-set <-> new_stops
     	   	   Connections : Connection-set <-> new_connections,
@@ -24,11 +23,11 @@ class
 	    Capacity = Nat, -- capacities
 	    StopId = Text  -- names of stops
     
-  	value 
-  
-		/* generators */
-	  
-	    -- empty :  Net = ... ,  -- the empty net
+  	value /* generators */
+		
+		emptyConnections : Connection-set = {},
+	  	emptyStops : Stop-set = {},
+	    empty : Net = mk_Net(emptyStops, emptyConnections),  -- the empty net
 	
 	    -- insert a stop with a given name and capacity 
 	    insertStop : StopId >< Capacity >< Net -> Net
@@ -50,9 +49,7 @@ class
     		else net
     		end
     
-  	value 
-  
-	  	/* observers */
+  	value /* observers */
 	   
 	    -- check whether a stop is in a network     
 	    isIn : StopId >< Net -> Bool
@@ -98,6 +95,20 @@ class
 	    
 	    /* Auxiliary functions for Observers and  Generators */
 	    
+	    /* This function returns a connection out of a connection-set that contains 
+	     * the stop, based on the ID of the two stations the connection is relating.
+	   	 * This function does not have any precondition, however it is recommanded
+	   	 * to perform the areDirectlyConnected(id1, id2, net) in order to know if the
+	   	 * there is a connection linking both stops inside the set or not.
+	   	 *
+	   	 * params
+	   	 *		id1 - ID of the first stop
+	   	 *		id2 - ID of the second stop
+	   	 *		connections - set of connections where the connection is
+	   	 *
+	   	 * returns 
+	   	 *		connection - connection relating the two stations described by their IDs.
+	   	 */
 	    getConnection : StopId >< StopId >< Connection-set -~-> Connection
 	    getConnection(id1, id2, connections) is 
 	    	let head = hd connections,
@@ -108,7 +119,18 @@ class
 	    		else getConnection(id1, id2, tail)
 	    		end
 	    	end,
-	    	
+	    
+	    /* Function used to know a connection is relating two specific stops described
+	     * by their IDs.
+	     *
+	     * params
+	     *		id1 - ID of the first station
+	     *		id2 - ID of the second station
+	     *		connection - connection we want to test
+	     *
+	     * returns
+	     *		boolean - true, if relating, false if not.
+	     */	
 	   	areConnectedBy : StopId >< StopId >< Connection -> Bool
 	    areConnectedBy(id1, id2, connection) is
 	   		(exists s1 : Stop :- s1 isin Stops(connection) /\ stopId(s1) = id1 /\
@@ -117,6 +139,19 @@ class
 	  			 )
 	  		 ), 
 	   	
+	   	/* This function returns a stop out of a stop-set that contains the stop
+	   	 * based on his ID.
+	   	 * This function does not have any precondition, however it is recommanded
+	   	 * to perform the function isIn(id, net) in order to know if the stop is
+	   	 * inside or not.
+	   	 *
+	   	 * params
+	   	 *		id - ID of the stop
+	   	 *		stops - set of stop where the stop is
+	   	 *
+	   	 * returns 
+	   	 *		stop - stop corresponding to the ID
+	   	 */
 	   	getStop : StopId >< Stop-set -~-> Stop
 	    getStop(id, stops) is 
 	    	let head = hd stops,
@@ -128,10 +163,62 @@ class
 	    		end
 	    	end
 	   
-  -- value 
-  
-	  	/* predicates to check nets */
+  	value /* predicates to check nets */
 	  	
-	   /*  isWellformed : Net -> Bool
-	    isWellformed(n) is ... */  
+		isWellformed : Net -> Bool
+	    isWellformed(n) is 
+	    	unicityNetStops(n) /\ validateStops(n) /\
+	    	connectionStops(n) /\ validateConnections(n)/\
+	    	usageStops(n) /\ usageConnections(n) /\
+	    	unicityNetConnections(n), 
+	   
+	    /* Auxiliary functions expressing requirements on the net */
+	    
+	    -- 1) Unicity of tram stops 
+	    unicityNetStops : Net -> Bool
+	    unicityNetStops(net) is
+	   		~(exists s1 : Stop :- s1 isin Stops(net) /\ 
+	   			(exists s2: Stop :- s2 isin Stops(net) /\ s1 ~= s2 /\ stopId(s1) = stopId(s2))),
+	   		   	
+	   	-- 2) Validity of the parameters of the stops
+	   	validateStops : Net -> Bool
+		validateStops(net) is
+	  		~(exists s : Stop :- s isin Stops(net) /\ stopCapacity(s) < 1),
+	   			
+	    -- 3) All connections should have exactly two stops in their stop-set
+	    connectionStops : Net -> Bool
+	    connectionStops(net) is 
+	   		~(exists c : Connection :- c isin Connections(net) /\ card Stops(c) ~= 2),
+	   	
+	   	-- 4) Validity of the parameters of the connections	
+		validateConnections : Net -> Bool
+	 	validateConnections(net) is
+	  		~(exists c : Connection :- c isin Connections(net) /\ 
+	  			(capacity(c) < 1 \/ headway(c) < 1 \/ drivingTime(c) < 1)),
+	  			
+	  	-- 5) All stops of the net are least used once in a connection
+	    usageStops : Net -> Bool
+	    usageStops(net) is
+	     	~(exists s : Stop :- s isin Stops(net) /\ ~stopUsed(s, net)),
+	     	
+	    stopUsed : Stop >< Net -> Bool
+	    stopUsed(s, net) is
+	    	(exists c : Connection :- c isin Connections(net) /\ (s isin Stops(c))),
+	    	
+	    -- 6) All stops used in connections are defined in the net stops
+	    usageConnections : Net -> Bool 
+	    usageConnections(net) is
+	    	~(exists c : Connection :- c isin Connections(net) /\ ~connectionUsed(c, net)),
+	    
+	    connectionUsed : Connection >< Net -> Bool 
+	    connectionUsed(c, net) is
+	    	~(exists s : Stop :- s isin Stops(c) /\ (s isin Stops(net)) = false),
+	    	
+	    -- 7) There is at most one connection between two stops
+	    unicityNetConnections : Net -> Bool 
+	    unicityNetConnections(net) is 
+	    	~(exists c1 : Connection :- c1 isin Connections(net) /\ 
+	    		(exists c2 : Connection :- c2 isin Connections(net) /\
+	    			Stops(c1) = Stops(c2) /\ c1 ~= c2))
+	    		    
 end  

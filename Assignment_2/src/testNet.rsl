@@ -1,26 +1,45 @@
 Net
 
+/* The following class is composed of a set of unit tests made on functions used 
+ * in the Scheme NET.
+ *
+ * The first tests are dealing with observers of NET and their auxiliary methods.
+ * The second part focuses on tests on the two generators of NET.
+ * The third part focuses on tests on the predicate and its auxiliary methods.
+ *
+ * Each method is tested following this pattern. A test where the output of the 
+ * method should be a "success" is performed on the tram net presented in the 
+ * project. Then, a situation where the method should "fail" is created by using
+ * specific inputs. Eventually, a third test can be performed in order to test a 
+ * particular behaviour of the function.
+ */
+
 scheme testNET =
 extend NET with 
 	class
 		test_case
 		
-		/* Tests on obeservers and auxiliary methods */
+--1) Tests on obeservers and auxiliary methods
 		
-		[IsinStop_1] /* Should return true because s is in the net */
+		[IsinStop_1] /* Should return true because b is in the net */
 			let
-				s1 = mk_Stop("Stop1", 2),
-				c = mk_Connection(1,1,1,{s1}),
-				net = mk_Net({s1}, {c})
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
 			in 
-				isIn("Stop1", net) = true
+				isIn("B", net) = true
 			end,
 			
 		[IsinStop_2] /* Should return false because s2 is not in the net */
 			let
 				s1 = mk_Stop("Stop1", 2),
 				s2 = mk_Stop("Stop1", 2),
-				c = mk_Connection(1,1,1,{s1}),
+				c = mk_Connection(1, 1, 1, {s1}),
 				net = mk_Net({s1}, {c})
 			in 
 				isIn("Stop2", net) = false
@@ -28,11 +47,16 @@ extend NET with
 			
 		[AreConnectedBy_1]  /* Should return true since they are connected by c */
 			let
-				s1 = mk_Stop("Stop1", 2),
-				s2 = mk_Stop("Stop2", 2),
-				c = mk_Connection(1, 1, 1, {s1, s2})
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
 			in 
-				areConnectedBy("Stop1", "Stop2", c) = true
+				areConnectedBy("B", "C", c2) = true
 			end,
 			
 		[AreConnectedBy_2]  /* Should return true since they are connected by c */
@@ -46,12 +70,16 @@ extend NET with
 			
 		[AreDirectlyConnected_1] /* Should return true since they are directly connected */
 			let
-				s1 = mk_Stop("Stop1", 2),
-				s2 = mk_Stop("Stop2", 2),
-				c = mk_Connection(1, 1, 1, {s1, s2}),
-				net = mk_Net({s1, s2}, {c})
-			in 
-				areDirectlyConnected("Stop1", "Stop2", net) = true
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in
+				areDirectlyConnected("A", "B", net) = true
 			end,
 			
 		[AreDirectlyConnected_2] /* Should return false since they are not directly connected */
@@ -63,18 +91,8 @@ extend NET with
 			in 
 				areDirectlyConnected("Stop1", "Stop3", net) = false
 			end,
-			
-		[GetConnection_1]
-			let
-				s1 = mk_Stop("Stop1", 2),
-				s2 = mk_Stop("Stop2", 2),
-				c = mk_Connection(1, 1, 1, {s1, s2}),
-				net = mk_Net({s1, s2}, {c})
-			in 
-				getConnection("Stop1", "Stop2", Connections(net)) = c
-			end,
 		
-		[GetConnection_2]
+		[GetConnection] /* Should return the connection c2 */
 			let
 				a = mk_Stop("A", 2),
 				b = mk_Stop("B", 3),
@@ -87,22 +105,8 @@ extend NET with
 			in
 				getConnection("B", "C", Connections(net)) = c2
 			end,
-		
-		[GetConnection_3]
-			let
-				a = mk_Stop("A", 2),
-				b = mk_Stop("B", 3),
-				c = mk_Stop("C", 2),
-				d = mk_Stop("D", 2),
-				c1 = mk_Connection(3, 10, 2, {a, b}),
-				c2 = mk_Connection(3, 12, 4, {b, c}),
-				c3 = mk_Connection(2, 7, 4, {b, d}),
-				net = mk_Net({a, b, c, d}, {c1, c2, c3})
-			in
-				getConnection("B", "C", Connections(net)) = c2
-			end, 
 			
-		[MinHeadway_1]
+		[MinHeadway_1] /* Should return the min headway of the connection c2: 4 */
 			let
 				a = mk_Stop("A", 2),
 				b = mk_Stop("B", 3),
@@ -130,7 +134,7 @@ extend NET with
 				minHeadway("A", "C", net) = 0
 			end,
 		
-		[MinDrivingTime_1]
+		[MinDrivingTime_1] /* Should return the min driving time of the connection c2: 3 */
 			let
 				a = mk_Stop("A", 2),
 				b = mk_Stop("B", 3),
@@ -158,7 +162,7 @@ extend NET with
 				minDrivingTime("A", "C", net) = 0
 			end,
 			
-		[Capacity_1]
+		[Capacity_1] /* Should return the capacity of the connection c2: 3 */
 			let
 				a = mk_Stop("A", 2),
 				b = mk_Stop("B", 3),
@@ -186,17 +190,7 @@ extend NET with
 				capacity("A", "C", net) = 0
 			end,
 		
-		[GetStop_1]
-			let
-				s1 = mk_Stop("Stop1", 2),
-				s2 = mk_Stop("Stop2", 2),
-				c = mk_Connection(1, 1, 1, {s1, s2}),
-				net = mk_Net({s1, s2}, {c})
-			in 
-				getStop("Stop2", Stops(net)) = s2
-			end,
-		
-		[GetStop_2]
+		[GetStop] /* Should return the stop c */
 			let
 				a = mk_Stop("A", 2),
 				b = mk_Stop("B", 3),
@@ -210,7 +204,7 @@ extend NET with
 				getStop("C", Stops(net)) = c
 			end,
 			
-		[Stop_Capacity_1]
+		[Stop_Capacity_1] /* Should return the capacity of the stop C: 2 */
 			let
 				a = mk_Stop("A", 2),
 				b = mk_Stop("B", 3),
@@ -238,12 +232,12 @@ extend NET with
 				capacity("E", net) = 0
 			end,
 			
-		/* Tests on generators */
+--2) Tests on generators 
 					
 		[InsertStop_1] /* Should insert the stop, then should be 2 stops in the net */
 			let
 				s1 = mk_Stop("Stop1", 2),
-				c = mk_Connection(1,1,1,{s1}),
+				c = mk_Connection(1, 1, 1, {s1}),
 				net = mk_Net({s1}, {c})
 			in 
 				card Stops(insertStop("Stop2", 3, net)) = 2
@@ -252,7 +246,7 @@ extend NET with
 		[InsertStop_2] /* Should not insert the stop since he is already in the net */
 			let
 				s1 = mk_Stop("Stop1", 2),
-				c = mk_Connection(1,1,1,{s1}),
+				c = mk_Connection(1, 1, 1, {s1}),
 				net = mk_Net({s1}, {c})
 			in 
 				card Stops(insertStop("Stop1", 3, net)) = 1
@@ -263,7 +257,7 @@ extend NET with
 				s1 = mk_Stop("Stop1", 2),
 				s2 = mk_Stop("Stop2", 2),
 				s3 = mk_Stop("Stop3", 2),
-				c = mk_Connection(1,1,1,{s1, s2}),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
 				net = mk_Net({s1, s2, s3}, {c})
 			in 
 				card Connections(addConnection("Stop3", "Stop2", 3, 15, 7, net)) = 2
@@ -273,10 +267,255 @@ extend NET with
 			let
 				s1 = mk_Stop("Stop1", 2),
 				s2 = mk_Stop("Stop2", 2),
-				c = mk_Connection(1,1,1,{s1, s2}),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
 				net = mk_Net({s1, s2}, {c})
 			in 
 				card Connections(addConnection("Stop1", "Stop2", 3, 15, 7, net)) = 1
-			end
+			end,
+			
+--3) Test on the predicate and auxiliary functions used 
+		
+		[UnicityNetStops_1] /* Should return true since all stops have different ids */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				unicityNetStops(net) = true 
+			end,
+			
+		[UnicityNetStops_2] /* Should return false since s1 and s2 have the same id */
+			let
+				s1 = mk_Stop("Stop1", 1),
+				s2 = mk_Stop("Stop1", 2),
+				c = mk_Connection(1, 1, 1,{s1, s2}),
+				net = mk_Net({s1, s2}, {c})
+			in 
+				unicityNetStops(net) = false
+			end,
+		
+		[UnicityNetStops_3] /* Should return 1 since their parameters have all the same values */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop1", 2),
+				c = mk_Connection(1, 1, 1,{s1, s2}),
+				net = mk_Net({s1, s2}, {c})
+			in 
+				card Stops(net) = 1
+			end,
+			
+		[ConnectionStops_1] /* Should return true, since all connections have two stops */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				connectionStops(net) = true
+			end,
+			
+		[ConnectionStops_2] /* Should return false since the connection is linking three stops */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				s3 = mk_Stop("Stop3", 2),
+				c = mk_Connection(1, 1, 1, {s1, s2, s3}),
+				net = mk_Net({s1, s2}, {c})
+			in 
+				connectionStops(net) = false 
+			end,
+			
+		[ValidateStops_1] /* Should return true since all stops have their capacity different from 0 */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				validateStops(net) = true 
+			end,		
+			
+		[ValidateStops_2] /* Should return false since the capacity of s2 is 0 */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 0),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
+				net = mk_Net({s1, s2}, {c})
+			in 
+				validateStops(net) = false 
+			end,	
 
+		[ValidateConnections_1] /* Should return true since all connections have their parameters different from 0 */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
+				net = mk_Net({s1, s2}, {c})
+			in 
+				validateConnections(net) = true 
+			end,			
+			
+		[ValidateConnections_2] /* Should return false since the driving time of c is 0 */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				c = mk_Connection(1, 0, 1, {s1, s2}),
+				net = mk_Net({s1, s2}, {c})
+			in 
+				validateConnections(net) = false 
+			end,	
+			
+		[StopUsed_1] /* Should return true since stop b is used in c1, c2 and c3 */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				stopUsed(b, net) = true 
+			end,			
+			
+		[StopUsed_2] /* Should return false since s3 is not used in the only connection c */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				s3 = mk_Stop("Stop3", 2),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
+				net = mk_Net({s1, s2}, {c})
+			in 
+				stopUsed(s3, net) = false 
+			end,		
+			
+		[UsageStops_1] /* Should return true since all stops are used at least once in a connection */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				usageStops(net) = true 
+			end,			
+			
+		[UsageStops_2] /* Should return false since s3 is not used in a connection */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				s3 = mk_Stop("Stop3", 2),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
+				net = mk_Net({s1, s2, s3}, {c})
+			in 
+				usageStops(net) = false 
+			end,
+			
+		[ConnectionUsed_1] /* Should return true since the stops of c2 are in the spots of the net */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				connectionUsed(c2, net) = true 
+			end,			
+			
+		[ConnectionUsed_2] /* Should return false since s3 is not in the stops of the net */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				s3 = mk_Stop("Stop3", 2),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
+				net = mk_Net({s1, s3}, {c})
+			in 
+				connectionUsed(c, net) = false 
+			end,		
+			
+		[UsageConnections_1] /* Should return true since all stops of the connections are in the stops of the net */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				usageConnections(net) = true 
+			end,			
+			
+		[UsageConnections_2] /* Should return false, since s3 of the connection c is not in the net */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				s3 = mk_Stop("Stop3", 2),
+				c = mk_Connection(1, 1, 1, {s1, s2}),
+				net = mk_Net({s1, s3}, {c})
+			in 
+				usageConnections(net) = false 
+			end,
+		
+		[UnicityNetConnections_1] /* Should return true since all connections are relating different stops */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				unicityNetConnections(net) = true 
+			end,			
+			
+		[UnicityNetConnections_2] /* Should return false since c1 and c2 are relating the same stops */
+			let
+				s1 = mk_Stop("Stop1", 2),
+				s2 = mk_Stop("Stop2", 2),
+				s3 = mk_Stop("Stop3", 2),
+				c1 = mk_Connection(1, 1, 1, {s1, s2}),
+				c2 = mk_Connection(1, 2, 5, {s1, s2}),
+				net = mk_Net({s1, s3}, {c1, c2})
+			in 
+				unicityNetConnections(net) = false 
+			end,
+			
+		[IsWellFormed] /* Should return true, since the net is well formed */
+			let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d}),
+				net = mk_Net({a, b, c, d}, {c1, c2, c3})
+			in 
+				isWellformed(net) = true
+			end	
+		
 end
