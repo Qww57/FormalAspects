@@ -1,3 +1,4 @@
+[NET_1] "1) Tests on the observers and their auxiliary functions"
 [IsinStop_1] true
 [IsinStop_2] true
 [AreConnectedBy_1] true
@@ -14,10 +15,12 @@
 [GetStop] true
 [Stop_Capacity_1] true
 [Stop_Capacity_2] true
+[NET_2] "2) Tests on the generators"
 [InsertStop_1] true
 [InsertStop_2] true
 [AddConnection_1] true
 [AddConnection_2] true
+[NET_3] "3) Tests on the predicate and its auxiliary functions"
 [UnicityNetStops_1] true
 [UnicityNetStops_2] true
 [UnicityNetStops_3] true
