@@ -1,42 +1,53 @@
 NET
 scheme TIMETABLE = extend NET with
 class
-  type 
-    TimeTable = Plan-set,
+	type 
+    	TimeTable = Plan-set,
     
-    Trip:: stationId :Text 
-	   arrivalTime : Time
-	   departureTime: Time,
+    	Trip:: stationId :Text 
+	   		arrivalTime : Time
+	   		departureTime: Time,
 	   
-    Plan:: tramId : Text
-	       trips : Trip-set <-> new_trips,
+    	Plan:: tramId : Text
+	    	trips : Trip-set <-> new_trips,
 
-    TramId = Text -- tram names
+    	TramId = Text -- tram names
 
     value /* generators */
-      -- the empty timetable
-     -- empty: TimeTable = TimeTable-set =,
+    
+      	-- the empty timetable
+    	-- empty: TimeTable = TimeTable-set =,
 
-      -- add to a time table an empty plan for a new tram
-      addTram: TramId >< TimeTable -> TimeTable
-      addTram(trId, tt) is
-	     {mk_Plan(trId, {})} union tt,
+      	-- add to a time table an empty plan for a new tram
+      	addTram: TramId >< TimeTable -> TimeTable
+      	addTram(trId, tt) is
+	    	 {mk_Plan(trId, {})} union tt,
 
-      -- add a stop with arrival time and departure time to the plan for a given tram
-      addStop: TramId >< StopId >< Time >< Time >< TimeTable -> TimeTable
-      addStop(trId, sId, at, dt, tt) is
+      	-- add a stop with arrival time and departure time to the plan for a given tram
+      	addStop: TramId >< StopId >< Time >< Time >< TimeTable -> TimeTable
+      	addStop(trId, sId, at, dt, tt) is
 		if isIn(trId, tt)
-	    then 
-			let 
+	    then let 
 				plan = getPlanByTramId(trId, tt),
 				tt = tt \ {plan} 
 			in
 				{new_trips({mk_Trip(sId, at, dt)} union trips(plan), plan)} union tt 
 			end
 		else {mk_Plan(trId, {mk_Trip(sId, at, dt)})} union tt
-		end,
-	
+		end
+		 
+	value /* observers */
+     
+     	-- check whether a tram with a given name exists in a given time table
+     	isIn : TramId >< TimeTable -> Bool
+	 	isIn(trId, tt) is
+			(exists plan : Plan :- plan isin tt /\ tramId(plan) = trId),
 
+    	/* -- you can add more observers here
+    	 ... */
+
+		/* Auxiliary functions for the Observers and Generators */
+	
 		getPlanByTramId: TramId >< TimeTable -> Plan
 		getPlanByTramId(trId, tt) is
 			let 
@@ -48,18 +59,6 @@ class
 	    		else getPlanByTramId(trId, tail)
 	    		end
 			end
-		 
-	value /* observers */
-     -- check whether a tram with a given name exists in a given time
-     -- table
-
-     isIn : TramId >< TimeTable -> Bool
-	 isIn(trId, tt) is
-		(exists plan : Plan :- plan isin tt /\ tramId(plan) = trId)
-
-    /* -- you can add more observers here
-     ... */
-
 
  -- value /* predicates to check time tables */   
    /*  isWellformed : TimeTable >< Net -> Bool
