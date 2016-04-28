@@ -43,9 +43,9 @@ class
 	    addConnection(id1, id2, hw, cap, dt, net) is
 	    	if (areDirectlyConnected(id1, id2, net) = false)
 	    	then new_connections(
-	    			Connections(net) union 
-	    				{mk_Connection(cap, dt, hw,{getStop(id1, Stops(net)), getStop(id2, Stops(net))})}
-					, net)
+	    	Connections(net) union 
+	    	{mk_Connection(cap, dt, hw,{getStop(id1, Stops(net)), getStop(id2, Stops(net))})}
+			, net)
     		else net
     		end
     
@@ -67,7 +67,7 @@ class
 	    	if areDirectlyConnected(id1, id2, net)
 	    	then headway(getConnection(id1, id2, Connections(net)))
 	    	else 0
-	    	end,	    
+	    	end,	      
 	
 	    -- get minimum driving time between two connected stops        
 	    minDrivingTime : StopId >< StopId >< Net -~-> DrivingTime
@@ -107,7 +107,7 @@ class
 	   	 *		connections - set of connections where the connection is
 	   	 *
 	   	 * returns 
-	   	 *		connection - connection relating the two stations described by their IDs.
+	   	 *		connection - connection relating the two stations.
 	   	 */
 	    getConnection : StopId >< StopId >< Connection-set -~-> Connection
 	    getConnection(id1, id2, connections) is 

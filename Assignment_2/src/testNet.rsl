@@ -6,7 +6,6 @@ NET
 scheme testNET =
 extend NET with 
 	class
-	
 		value 
 			--Example of the project description for a well defined net
 			basicExample : Unit -> Net
