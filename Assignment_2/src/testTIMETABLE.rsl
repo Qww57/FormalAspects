@@ -1,7 +1,7 @@
 TIMETABLE
 
 /* The following class is composed of a set of unit tests made on functions used 
- * in the Scheme NET.
+ * in the Scheme TIMETABLE.
  */
 scheme testTIMETABLE =
 extend TIMETABLE with 
@@ -10,11 +10,66 @@ extend TIMETABLE with
 				
 	test_case
 	
-	[addTram_1] 
+		[addTram_1] 
 			let
 				trId = "TramB",
 				tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
 			in 
 				card addTram(trId, tt) = 2
+			end,
+			
+		
+		[isIn_1] 
+			let
+
+				tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+			in 
+				isIn("TramB", tt) = true
+			end,
+			
+		[isIn_2] 
+			let
+
+				tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+			in 
+				isIn("TramA", tt) = false
+			end,
+			
+		[getPlanByTramId_1] 
+			let
+				tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+			in 
+				getPlanByTramId("TramB", tt) = mk_Plan("TramB",{mk_Trip("A",0,2)})
+			end,
+			
+		[getPlanByTramId_2] 
+			let
+				tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+			in 
+				getPlanByTramId("TramA", tt)
+			end,	
+		--success scenario
+		[addStop_1] 
+			let
+				trId="TramA", 
+				sId="B", 
+				at= 12, 
+				dt= 24, 
+				tt = {mk_Plan("TramA",{mk_Trip("A",0,2)})}			
+			in 
+				addStop(trId, sId, at, dt, tt) = {mk_Plan("TramA",{mk_Trip("B",12,24),mk_Trip("A",0,2)})}
+			end,
+		--fail scenario	
+		[addStop_2] 
+			let
+				trId="TramA", 
+				sId="C", 
+				at= 12, 
+				dt= 24, 
+				tt = {mk_Plan("TramA",{mk_Trip("C",12,24)})}			
+			in 
+				addStop(trId, sId, at, dt, tt)= {mk_Plan("TramA",{mk_Trip("C",12,24)})}
 			end
+			
+		
 end

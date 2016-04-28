@@ -4,3 +4,6 @@ Assignment_2/src/Net.rsl.el
 Colouring/ColouringBasics.rsl.el
 *.el
 *.el0
+*.results
+Assignment_2/src/testTIMETABLE.rsl~
+*.rsl~
