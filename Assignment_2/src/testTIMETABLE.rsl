@@ -1,0 +1,20 @@
+TIMETABLE
+
+/* The following class is composed of a set of unit tests made on functions used 
+ * in the Scheme NET.
+ */
+scheme testTIMETABLE =
+extend TIMETABLE with 
+	class
+	
+				
+	test_case
+	
+	[addTram_1] 
+			let
+				trId = "TramB",
+				tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+			in 
+				card addTram(trId, tt) = 2
+			end
+end
