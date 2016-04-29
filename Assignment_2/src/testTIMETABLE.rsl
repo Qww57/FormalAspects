@@ -8,7 +8,10 @@ extend TIMETABLE with
 	class
 					
 		test_case
-
+		
+			/* Adding a plan for a tram to time table, it should
+				return true because we have to have 2 elements after adding*/
+			
 			[addTram_1] 
 				let
 					trId = "TramB",
@@ -16,7 +19,8 @@ extend TIMETABLE with
 				in 
 					card addTram(trId, tt) = 2
 				end,
-				
+			
+			/* Should return true because TramB is in time table */	
 			
 			[isIn_1] 
 				let
@@ -25,13 +29,17 @@ extend TIMETABLE with
 					isIn("TramB", tt) = true
 				end,
 				
+			/* Should return false because TramB is not in time table */
+			
 			[isIn_2] 
 				let
 					tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
 				in 
 					isIn("TramA", tt) = false
 				end,
-				
+			
+			/* Should return true because becuase we want to get plan2 */
+			
 			[getPlanByTramId_1] 
 				let
 					plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
@@ -40,7 +48,9 @@ extend TIMETABLE with
 				in 
 					getPlanByTramId("TramB", tt) = plan2
 				end,
-				
+			
+			/* Should return true because becuase we want to get plan2 */
+			
 			[getPlanByTramId_2] 
 				let
 					plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
@@ -50,7 +60,8 @@ extend TIMETABLE with
 					getPlanByTramId("TramC", tt) 
 				end,
 					
-			--success scenario
+			/* Should return true because becuase we add stop to plan
+				and we should have two trip in the plan after adding*/
 			[addStop_1] 
 				let
 					trId="TramA", 
@@ -62,7 +73,8 @@ extend TIMETABLE with
 					addStop(trId, sId, at, dt, tt) = {mk_Plan("TramA",{mk_Trip("B",12,24),mk_Trip("A",0,2)})}
 				end,
 				
-			--fail scenario	
+			/* Should return true because becuase we added a stop which
+			is already exist in plan */
 			
 			[addStop_2] 
 				let
@@ -73,5 +85,66 @@ extend TIMETABLE with
 					tt = {mk_Plan("TramA",{mk_Trip("C",12,24)})}			
 				in 
 					addStop(trId, sId, at, dt, tt)= {mk_Plan("TramA",{mk_Trip("C",12,24)})}
-				end		
+				end,
+			
+			/* Should return true because arrival time and 
+				departure time are different */
+			
+			[isADTimeAreDifferent_1] 
+				let
+					
+					trip = mk_Trip("C",12,24)			
+				in 
+					isADTimeAreDifferent(trip)= true
+				end,
+			
+			/* Should return false because arrival time and 
+				departure time are same */	
+			
+			[isADTimeAreDifferent_2] 
+				let
+					 
+					trip = mk_Trip("C",12,12)			
+				in 
+					isADTimeAreDifferent(trip)= false
+				end,
+			
+			/* Should return true because arrival time is before 
+				departure time */		
+				
+			[isATimeBeforeDTime_1] 
+				let	
+					trip = mk_Trip("C",12,24)			
+				in 
+					isATimeBeforeDTime(trip)= true
+				end,
+			
+			/* Should return false because departure time is before 
+				arrival time */
+			
+			[isATimeBeforeDTime_2] 
+				let	
+					trip = mk_Trip("C",24,12)			
+				in 
+					isATimeBeforeDTime(trip)= false
+				end,
+			
+			/* Should return true because values are between 0 and 60 */
+			
+			[areValuesinRange_1] 
+				let
+					plan = mk_Plan("TramA",{mk_Trip("A",0,2)})			
+				in 
+					areValuesinRange(plan) = true
+				end,
+			
+			/* Should return true because values are not between 0 and 60 */	
+			
+			[areValuesinRange_2] 
+				let
+					plan = mk_Plan("TramA",{mk_Trip("A",61,62), mk_Trip("A",0,2)})			
+				in 
+					areValuesinRange(plan) = false
+				end
+				
 end

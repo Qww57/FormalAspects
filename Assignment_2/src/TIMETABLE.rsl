@@ -5,11 +5,11 @@ class
     	TimeTable = Plan-set,
     
     	Trip:: stationId :Text 
-	   		arrivalTime : Time
-	   		departureTime: Time,
+			   arrivalTime : Time
+	   		   departureTime: Time,
 	   
     	Plan:: tramId : Text
-	    	trips : Trip-set <-> new_trips,
+			   trips : Trip-set <-> new_trips,
 
     	TramId = Text -- tram names
 
@@ -58,8 +58,39 @@ class
 	    		then head 
 	    		else getPlanByTramId(trId, tail)
 	    		end
-			end
-
+			end,
+			
+		/* reuirement that check if departure time and arrival time are not equal */	
+		
+		isADTimeAreDifferent: Trip -> Bool
+		isADTimeAreDifferent(trip) is
+				if( arrivalTime(trip) ~= departureTime(trip))
+				then true
+				else false
+			end,	
+		--
+		
+		
+		/* reuirement that check that departure time
+			should not be before arrival time  */
+		
+		isATimeBeforeDTime: Trip -> Bool
+		isATimeBeforeDTime(trip) is
+				if( arrivalTime(trip) < departureTime(trip))
+				then true
+				else false
+			end,
+			
+		/* reuirement that check if all the values are in range between 0 and 60  */
+		
+		areValuesinRange: Plan -> Bool
+		areValuesinRange(plan) is
+			~(exists trip : Trip :- trip isin trips(plan) /\ (arrivalTime(trip) < 0 \/
+				arrivalTime(trip) > 60) /\ (departureTime(trip) < 0 \/ departureTime(trip) > 60))
+				
+		
+			
+		
  -- value /* predicates to check time tables */   
    /*  isWellformed : TimeTable >< Net -> Bool
      isWellformed(t, n) is ...,
