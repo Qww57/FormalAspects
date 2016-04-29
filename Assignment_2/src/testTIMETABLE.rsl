@@ -138,7 +138,7 @@ extend TIMETABLE with
 					areValuesinRange(plan) = true
 				end,
 			
-			/* Should return true because values are not between 0 and 60 */	
+			/* Should return false because values are not between 0 and 60 */	
 			
 			[areValuesinRange_2] 
 				let
