@@ -1,16 +1,21 @@
 NET
 scheme TIMETABLE = extend NET with
 class
-	type 
+	type /* Time table type */
+	
     	TimeTable = Plan-set,
+    	
+    	/* Auxiliary types */
+    	
+    	Plan:: tramId : TramId
+	    	   trips : Trip-set <-> new_trips,
     
-    	Trip:: stationId :Text 
+    	Trip:: stationId :StopId 
 	   		arrivalTime : Time
 	   		departureTime: Time,
+	   		
+	   	/* Simple predefined types */
 	   
-    	Plan:: tramId : Text
-	    	trips : Trip-set <-> new_trips,
-
     	TramId = Text -- tram names
 
     value /* generators */
@@ -43,8 +48,11 @@ class
 	 	isIn(trId, tt) is
 			(exists plan : Plan :- plan isin tt /\ tramId(plan) = trId),
 
-    	/* -- you can add more observers here
-    	 ... */
+		-- check whether a stop with a given name exists in a given time table
+    	stopIsIn : StopId >< TimeTable -> Bool
+    	stopIsIn(id, t) is
+    		(exists p : Plan :- p isin t /\
+    			(exists t : Trip :- t isin trips(p) /\ stationId(t) = id)),
 
 		/* Auxiliary functions for the Observers and Generators */
 	
@@ -60,10 +68,24 @@ class
 	    		end
 			end
 
- -- value /* predicates to check time tables */   
-   /*  isWellformed : TimeTable >< Net -> Bool
-     isWellformed(t, n) is ...,
+ 	 value /* predicates to check time tables */   
+   		/*  isWellformed : TimeTable >< Net -> Bool
+     	isWellformed(t, n) is ...,
 
-     ...*/
-  
+     	...*/
+     
+    	--10) All stops of the time table should be defined in the net
+     	requirementTen : TimeTable >< Net -> Bool 
+     	requirementTen(t, n) is
+     		~(exists p : Plan :- p isin t /\ stopDefinition(p, n)),
+     	
+     	-- All stops of the trips of the plan are defined in the net 
+     	stopDefinition : Plan >< Net -> Bool
+     	stopDefinition(p, n) is 
+     		~(exists t : Trip :- t isin trips(p) /\ isIn(stationId(t), n)),
+     		
+     	--11) All stops of the net are used at least once in the time table
+     	requirementEleven : TimeTable >< Net -> Bool
+     	requirementEleven(t, n) is
+     		~(exists s : Stop :- s isin Stops(n) /\ ~stopIsIn(stopId(s), t))
 end 
