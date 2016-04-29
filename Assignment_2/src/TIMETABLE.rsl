@@ -15,7 +15,7 @@ class
 	   		departureTime: Time,
 	   		
 	   	/* Simple predefined types */
-	   
+
     	TramId = Text -- tram names
 
     value /* generators */
@@ -69,12 +69,37 @@ class
 			end
 
  	 value /* predicates to check time tables */   
-   		/*  isWellformed : TimeTable >< Net -> Bool
-     	isWellformed(t, n) is ...,
-
-     	...*/
-     
-    	--10) All stops of the time table should be defined in the net
+   		
+   		--isWellformed : TimeTable >< Net -> Bool
+     	--isWellformed(t, n) is ...,
+			
+		/* requirement that check if departure time and arrival time are not equal */	
+		
+		isADTimeAreDifferent: Trip -> Bool
+		isADTimeAreDifferent(trip) is
+				if( arrivalTime(trip) ~= departureTime(trip))
+				then true
+				else false
+			end,				
+		
+		/* requirement that check that departure time
+			should not be before arrival time  */
+		
+		isATimeBeforeDTime: Trip -> Bool
+		isATimeBeforeDTime(trip) is
+				if( arrivalTime(trip) < departureTime(trip))
+				then true
+				else false
+			end,
+			
+		/* requirement that check if all the values are in range between 0 and 60  */
+		
+		areValuesinRange: Plan -> Bool
+		areValuesinRange(plan) is
+			~(exists trip : Trip :- trip isin trips(plan) /\ (arrivalTime(trip) < 0 \/
+				arrivalTime(trip) > 60 \/ departureTime(trip) < 0 \/ departureTime(trip) > 60)),
+    
+    	-- 10) All stops of the time table should be defined in the net
      	requirementTen : TimeTable >< Net -> Bool 
      	requirementTen(t, n) is
      		~(exists p : Plan :- p isin t /\ stopDefinition(p, n)),
@@ -84,8 +109,8 @@ class
      	stopDefinition(p, n) is 
      		~(exists t : Trip :- t isin trips(p) /\ isIn(stationId(t), n)),
      		
-     	--11) All stops of the net are used at least once in the time table
+     	-- 11) All stops of the net are used at least once in the time table
      	requirementEleven : TimeTable >< Net -> Bool
      	requirementEleven(t, n) is
-     		~(exists s : Stop :- s isin Stops(n) /\ ~stopIsIn(stopId(s), t))
+     		~(exists s : Stop :- s isin Stops(n) /\ ~stopIsIn(stopId(s), t)) 
 end 
