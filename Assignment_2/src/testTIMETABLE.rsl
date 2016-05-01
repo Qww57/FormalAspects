@@ -344,6 +344,35 @@ extend TIMETABLE with
 					t = {plan1, plan2}			
 				in
 					requirementTwelve(t, basicExample()) = false
-				end		
+				end, 
+				
+			[GetAllTrips_1]
+				card getAllTrips(basicTimetable()) = 10,
+				
+			[GetAllTrips_2]
+				let
+					plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("D",15,20)}),
+					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+					t = {plan1, plan2}			
+				in
+					card getAllTrips(t) = 3
+				end,
+				
+			[RequirementSix_1]
+				requirementSix(basicTimetable(), basicExample()) = true,
+				
+			[RequirementSix_2]
+				false, --  TODO
+			
+			[GetWaitingTrams]
+				card getWaitingTrams(basicTimetable(), "A", 1) = 1
+				/\ card getWaitingTrams(basicTimetable(), "A", 29) = 1
+				/\ card getWaitingTrams(basicTimetable(), "A", 47) = 0,
+			
+			[RequirementSeven_1]
+				requirementSeven(basicTimetable(), basicExample()) = true,
+				
+			[RequirementSeven_2]
+				false --  TODO
 			
 end
