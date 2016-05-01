@@ -99,6 +99,11 @@ class
 			~(exists trip : Trip :- trip isin trips(plan) /\ (arrivalTime(trip) < 0 \/
 				arrivalTime(trip) > 60 \/ departureTime(trip) < 0 \/ departureTime(trip) > 60)),
     
+    	-- 7) Respect of stop capacity
+    	requirementSeven : TimeTable >< Net -> Bool
+    	requirementSeven(t, n) is
+    		false, --TODO
+    
     	-- 10) All stops of the time table should be defined in the net
      	requirementTen : TimeTable >< Net -> Bool 
      	requirementTen(t, n) is
@@ -112,5 +117,102 @@ class
      	-- 11) All stops of the net are used at least once in the time table
      	requirementEleven : TimeTable >< Net -> Bool
      	requirementEleven(t, n) is
-     		~(exists s : Stop :- s isin Stops(n) /\ ~stopIsIn(stopId(s), t)) 
+     		~(exists s : Stop :- s isin Stops(n) /\ ~stopIsIn(stopId(s), t)), 
+     		
+     	-- 12) All connections implicitely defined in the time table are also defined
+     	-- in the net, last trip is not checked since same station than first one
+     	requirementTwelve : TimeTable >< Net -> Bool
+     	requirementTwelve(t, n) is 
+     		~(exists p : Plan :- p isin t /\ 
+     			(exists trip : Trip :- trip isin trips(p) /\ 
+     				~areDirectlyConnected(stationId(trip), stationId(getNextTrip(p, trip)), n)
+     				/\ departureTime(trip) ~= getLastTripDepartureTime(trips(p), 0)
+     			)
+     		),
+     		
+     	/* Auxiliary functions used in order to get the next trip of a given trip in a plan */	
+     	
+     	-- Get the next trip of a specific trip in a plan using the arrivalTime
+     	getNextTrip : Plan >< Trip -> Trip
+     	getNextTrip(p, trip) is
+     		getTripByATime(trips(p), getNextTripArrivalTime(trips(p), trip)),
+     	
+     	-- Get the arrival time of a trip
+     	getNextTripArrivalTime : Trip-set >< Trip -> Time 
+     	getNextTripArrivalTime(p, t) is
+     		if (departureTime(t) = getLastTripDepartureTime(p, 0))
+     		then getFirstTripArrivalTime(p, 61) 
+     		else getNextTripLoop(p, t, 61)
+  			end,
+  		
+  		-- Return arrival time of the first trip
+  		getFirstTripArrivalTime : Trip-set >< Time -> Time
+  		getFirstTripArrivalTime(p, best) is 
+  			if p ~= {}
+  			then let head = hd p,
+  			    	 tail = p \ {head}
+  				in getFirstTripArrivalTime(tail, smallestAT(head, best))
+  				end 
+  			else best 
+  			end, 
+  				
+  		-- Return the smallest of two values
+  		smallestAT : Trip >< Time -> Time
+  		smallestAT(head, best) is
+  			if arrivalTime(head) < best 
+  			then arrivalTime(head)
+  			else best
+  			end,
+  			
+  		-- Return arrival time of the first trip
+  		getLastTripDepartureTime : Trip-set >< Time -> Time
+  		getLastTripDepartureTime(p, best) is 
+  			if p ~= {}
+  			then let head = hd p,
+  			    	 tail = p \ {head}
+  				in getLastTripDepartureTime(tail, biggestDT(head, best))
+  				end 
+  			else best 
+  			end, 
+  				
+  		-- Return the biggest of two values
+  		biggestDT : Trip >< Time -> Time
+  		biggestDT(head, best) is
+  			if departureTime(head) > best 
+  			then departureTime(head)
+  			else best
+  			end,
+  			
+  		-- Get trip from a set trip using its arrival time
+     	getTripByATime : Trip-set >< Time -> Trip
+     	getTripByATime(p, aTime) is 
+     		let 
+     			head = hd p, 
+     			tail = p \ {head}
+     		in
+     			if arrivalTime(head) = aTime
+     			then head
+     			else getTripByATime(tail, aTime)
+     			end
+     		end,
+     	
+     	-- Function used in order to get the next trip of a given trip in a time table
+     	getNextTripLoop : Trip-set >< Trip >< Time -> Time
+     	getNextTripLoop(p, t, best) is 
+     		if p ~= {}
+     		then let head = hd p,
+     				tail = p \{head}
+     			 in insideFunction(t, head, tail, best)	
+     			 end
+     		else best
+     		end,  
+     		
+     	-- Function used with getNextTripLoop
+     	insideFunction : Trip >< Trip >< Trip-set >< Time -> Time
+     	insideFunction(t, head, tail, best) is
+     		if (departureTime(t) < arrivalTime(head) /\ arrivalTime(head) < best)
+			then getNextTripLoop(tail, t , arrivalTime(head))
+			else getNextTripLoop(tail, t , best)  	
+			end	
+     	  		 
 end 

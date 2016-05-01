@@ -197,14 +197,14 @@ extend TIMETABLE with
 					areValuesinRange(plan) = false
 				end,
 				
-						/* Should return true since all stops defined in trips are also defined in the net */
+			/* Should return true since all stops defined in trips are also defined in the net */
 			
-			[requirementTen_1]
+			[RequirementTen_1]
 				requirementTen(basicTimetable(), basicExample()) = true,
 				
 			/* Should return false since stop E is not defined in the net */
 			
-			[requirementTen_2]
+			[RequirementTen_2]
 				let
 					plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
 					plan2 = mk_Plan("TramB",{mk_Trip("E",1,5)}),
@@ -220,12 +220,130 @@ extend TIMETABLE with
 			
 			/* Should return false since the stop D of the net is not used in the time table */
 			
-			[requirementEleven_2]
+			[RequirementEleven_2]
 				let
 					plan1 = mk_Plan("TramA",{mk_Trip("A",0,2), mk_Trip("C",1,5)}),
 					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
 					t = {plan1, plan2}			
 				in
 					requirementEleven(t, basicExample()) = false
-				end
+				end,
+				
+			[GetTripByATime_1]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_one) = trip_two
+				end,
+				
+			[GetTripByATime]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getTripByATime(trips, 0) = trip_one
+				end,
+				
+			[GetTripByATime_2]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getTripByATime(trips, 28) = trip_three
+				end,
+				
+			[GetLastTripDepartureTime_1]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four}
+				in
+					getLastTripDepartureTime(trips, 0) = 48
+				end,
+				
+			[GetLastTripDepartureTime_2]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trip_five = mk_Trip("A", 55, 60),
+					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
+					plan = mk_Plan("tram1", trips)
+				in
+					getLastTripDepartureTime(trips, 0) = 60
+				end,
+				
+			[GetNextTrip_1]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_two) = trip_three
+				end,
+				
+			[GetNextTrip_2]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_one) = trip_two
+				end,
+				
+			[GetNextTrip_3]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trip_five= mk_Trip("A", 55, 60),
+					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_five) = trip_one
+				end,			
+			
+			[RequirementTwelve_1]
+				requirementTwelve(basicTimetable(), basicExample()) = true,
+				 
+			[RequirementTwelve_2]
+				let
+					plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("D",15,20)}),
+					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+					t = {plan1, plan2}			
+				in
+					requirementTwelve(t, basicExample()) = false
+				end		
+			
 end
