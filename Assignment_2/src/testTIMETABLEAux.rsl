@@ -1,0 +1,208 @@
+TIMETABLE
+
+/* The following class is composed of a set of unit tests made on auxiliary
+ * functions used in the Scheme TIMETABLE.
+ */
+scheme testTIMETABLEAux =
+extend TIMETABLE with 
+	class	
+	value
+			--Example of the project description for a well defined net
+			basicExample : Unit -> Net
+			basicExample() is 
+				let
+				a = mk_Stop("A", 2),
+				b = mk_Stop("B", 3),
+				c = mk_Stop("C", 2),
+				d = mk_Stop("D", 2),
+				c1 = mk_Connection(3, 10, 2, {a, b}),
+				c2 = mk_Connection(3, 12, 4, {b, c}),
+				c3 = mk_Connection(2, 7, 4, {b, d})			
+			in 
+				mk_Net({a, b, c, d}, {c1, c2, c3})
+			end,	
+		
+			--Example of the project description for a well defined net
+			basicTimetable : Unit -> TimeTable
+			basicTimetable() is 
+				let
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trip_five = mk_Trip("A", 59, 60),
+					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
+					plan_one = mk_Plan("tram1", trips),
+					
+					--Creating the time table for tram 2
+					trip_a = mk_Trip("D", 0, 2),
+					trip_b = mk_Trip("B", 11, 13),
+					trip_c = mk_Trip("A", 28, 32),
+					trip_d = mk_Trip("B", 47, 50),
+					trip_e = mk_Trip("D", 58, 60),
+					trips_bis = {trip_a, trip_b, trip_c, trip_d, trip_e},
+					plan_two = mk_Plan("tram1", trips_bis)
+				in 
+					{plan_one, plan_two}
+				end,
+				
+				time : Nat = 4,
+				emptyPlan : Plan-set = {}
+		
+		test_case
+			
+			[GetTripByATime_1]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_one) = trip_two
+				end,
+				
+			[GetTripByATime]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getTripByATime(trips, 0) = trip_one
+				end,
+				
+			[GetTripByATime_2]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getTripByATime(trips, 28) = trip_three
+				end,
+				
+			[GetLastTripDepartureTime_1]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four}
+				in
+					getLastTripDepartureTime(trips, 0) = 48
+				end,
+				
+			[GetLastTripDepartureTime_2]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trip_five = mk_Trip("A", 55, 60),
+					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
+					plan = mk_Plan("tram1", trips)
+				in
+					getLastTripDepartureTime(trips, 0) = 60
+				end,
+				
+			[GetNextTrip_1]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_two) = trip_three
+				end,
+				
+			[GetNextTrip_2]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trips = {trip_one, trip_two, trip_three, trip_four},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_one) = trip_two
+				end,
+				
+			[GetNextTrip_3]
+				let 
+					--Creating the time table for tram 1
+					trip_one = mk_Trip("A", 0, 1),
+					trip_two = mk_Trip("B", 12, 14),
+					trip_three = mk_Trip("C", 28, 32),
+					trip_four = mk_Trip("B", 46, 48),
+					trip_five= mk_Trip("A", 55, 60),
+					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
+					plan = mk_Plan("tram1", trips)
+				in
+					getNextTrip(plan, trip_five) = trip_one
+				end,
+			
+			[GetAllTrips_1]
+				card getAllTrips(basicTimetable()) = 10,
+				
+			[GetAllTrips_2]
+				let
+					plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("D",15,20)}),
+					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+					t = {plan1, plan2}			
+				in
+					card getAllTrips(t) = 3
+				end, 
+								
+			[nextDepartureLoop]
+				let 
+					plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("B",15,20)}),
+					trip = mk_Trip("A",1,5),
+					plan2 = mk_Plan("TramB",{trip, mk_Trip("B",15,20)}),
+					t = {plan1, plan2}			
+				in
+					nextDepartureLoop("A", "B", time, t, mk_Plan("", {}), mk_Trip("", 61, 61))
+					 = (plan2, trip)
+				end,
+				
+			[NextDeparture_1]
+				let 
+					plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("B",15,20)}),
+					trip = mk_Trip("A",1,5),
+					plan2 = mk_Plan("TramB",{trip, mk_Trip("B",15,20)}),
+					t = {plan1, plan2}			
+				in
+					nextDeparture("A", "B", time, t) = (plan2, trip)
+				end,
+				
+			/* Should return the second plan and the 3rd trip, since it is the first one
+			from A to B after the minute 2 */	
+				
+			[NextDeparture_2] -- time = 2
+			 	nextDeparture("A", "B", time, basicTimetable()),
+			 	
+			[NextDeparture_3] -- time = 2
+			 	nextDeparture("B", "A", time, basicTimetable()),
+			 	
+			[CheckHeadway_1]
+				false, --TODO
+				
+			[CheckHeadway_2]
+				false --TODO
+				
+end

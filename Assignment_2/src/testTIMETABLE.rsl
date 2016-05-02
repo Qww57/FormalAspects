@@ -1,7 +1,7 @@
 TIMETABLE
 
-/* The following class is composed of a set of unit tests made on functions used 
- * in the Scheme TIMETABLE.
+/* The following class is composed of a set of unit tests made on the 
+ * requirements functions used in the Scheme TIMETABLE.
  */
 scheme testTIMETABLE =
 extend TIMETABLE with 
@@ -261,111 +261,6 @@ extend TIMETABLE with
 					requirementEleven(t, basicExample()) = false
 				end,
 				
-			[GetTripByATime_1]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trips = {trip_one, trip_two, trip_three, trip_four},
-					plan = mk_Plan("tram1", trips)
-				in
-					getNextTrip(plan, trip_one) = trip_two
-				end,
-				
-			[GetTripByATime]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trips = {trip_one, trip_two, trip_three, trip_four},
-					plan = mk_Plan("tram1", trips)
-				in
-					getTripByATime(trips, 0) = trip_one
-				end,
-				
-			[GetTripByATime_2]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trips = {trip_one, trip_two, trip_three, trip_four},
-					plan = mk_Plan("tram1", trips)
-				in
-					getTripByATime(trips, 28) = trip_three
-				end,
-				
-			[GetLastTripDepartureTime_1]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trips = {trip_one, trip_two, trip_three, trip_four}
-				in
-					getLastTripDepartureTime(trips, 0) = 48
-				end,
-				
-			[GetLastTripDepartureTime_2]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trip_five = mk_Trip("A", 55, 60),
-					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
-					plan = mk_Plan("tram1", trips)
-				in
-					getLastTripDepartureTime(trips, 0) = 60
-				end,
-				
-			[GetNextTrip_1]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trips = {trip_one, trip_two, trip_three, trip_four},
-					plan = mk_Plan("tram1", trips)
-				in
-					getNextTrip(plan, trip_two) = trip_three
-				end,
-				
-			[GetNextTrip_2]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trips = {trip_one, trip_two, trip_three, trip_four},
-					plan = mk_Plan("tram1", trips)
-				in
-					getNextTrip(plan, trip_one) = trip_two
-				end,
-				
-			[GetNextTrip_3]
-				let 
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trip_five= mk_Trip("A", 55, 60),
-					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
-					plan = mk_Plan("tram1", trips)
-				in
-					getNextTrip(plan, trip_five) = trip_one
-				end,			
-			
 			[RequirementTwelve_1]
 				requirementTwelve(basicTimetable(), basicExample()) = true,
 				 
@@ -377,19 +272,7 @@ extend TIMETABLE with
 				in
 					requirementTwelve(t, basicExample()) = false
 				end, 
-				
-			[GetAllTrips_1]
-				card getAllTrips(basicTimetable()) = 10,
-				
-			[GetAllTrips_2]
-				let
-					plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("D",15,20)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					t = {plan1, plan2}			
-				in
-					card getAllTrips(t) = 3
-				end,
-				
+								
 			[RequirementSix_1]
 				requirementSix(basicTimetable(), basicExample()) = true,
 				
@@ -405,6 +288,8 @@ extend TIMETABLE with
 				requirementSeven(basicTimetable(), basicExample()) = true,
 				
 			[RequirementSeven_2]
-				false --  TODO
-			
+				false, --  TODO
+				
+			[RequirementNine_1]
+				requirementNine(basicTimetable(), basicExample()) = true
 end

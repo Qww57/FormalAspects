@@ -76,15 +76,15 @@ class
 		-- 1) Arrival time and departure time of the same trip cannot be equals		
 		isADTimeAreDifferent: Trip -> Bool
 		isADTimeAreDifferent(trip) is
-				if( arrivalTime(trip) ~= departureTime(trip))
+				if(arrivalTime(trip) ~= departureTime(trip))
 				then true
 				else false
 			end,				
 		
-		-- 2) The departure time  shouldn’t be before  arrival time
+		-- 2) The departure time  shouldn't be before  arrival time
 		isATimeBeforeDTime: Trip -> Bool
 		isATimeBeforeDTime(trip) is
-				if( arrivalTime(trip) < departureTime(trip))
+				if(arrivalTime(trip) < departureTime(trip))
 				then true
 				else false
 			end,
@@ -104,6 +104,8 @@ class
 			~(exists p1 : Plan :- p1 isin tt /\ tramId(p1) = trId /\
 				(exists p2: Plan :- p2 isin tt /\ p1 ~=p2 /\ tramId(p2) = tramId(p1))
 			 ),
+		
+		-- 5) NOPE
     
 		-- 6) Respect of connection driving time --TOTEST
 		requirementSix : TimeTable >< Net -> Bool 
@@ -116,6 +118,8 @@ class
 				)
 			),
     
+    	-- Set used in order to define the minutes to check
+    	-- Used in order to have a correct synthax for nested loops.
     	Times : Time-set = {0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,
     						26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
     						48,49,50,51,52,53,54,55,56,57,58,59,60},
@@ -129,37 +133,30 @@ class
     			)
     		), 
     		
-    	-- 8) Respect of connection headway 
+    	-- 8) Respect of connection capacity 
     	requirementEight : TimeTable >< Net -> Bool 
 		requirementEight(t, n) is	
-			false,
+			false, --TODO
+						
+		-- 9) Respect of connection headway
+		requirementNine : TimeTable >< Net -> Bool
+		requirementNine(t, n) is
+			~(exists p : Plan :- p isin t /\
+				(exists trip : Trip :- trip isin trips(p) /\ ~checkHeadway(p, trip, t, n))
+			),
 		
-		getWaitingTrams : TimeTable >< StopId >< Time -> Trip-set 
-		getWaitingTrams(t, stopId, time) is
-			let trips = getAllTrips(t)
-			in getWaitingTramsInit(trips, stopId, {}, time)
+		-- Return true if the trip and its next departure in the right direction according 
+		-- to the time table and the net are respecting the headway of the connection
+		checkHeadway : Plan >< Trip >< TimeTable >< Net -> Bool
+		checkHeadway(plan, trip, t, n) is
+			let station = stationId(trip),
+				nextStation = stationId(getNextTrip(plan, trip)),
+				(nPlan, nTrip) = nextDeparture(station, nextStation, departureTime(trip), t),
+				dtime = departureTime(nTrip),
+				headway = dtime - departureTime(trip)
+			in (minHeadway(station, nextStation, n) < headway)
 			end,
-		
-		getWaitingTramsInit : Trip-set >< StopId >< Trip-set >< Time -> Trip-set 
-		getWaitingTramsInit(tripset, stopId, result, time) is		
-			if tripset ~={} 					
-			then let 
-					head = hd tripset,
-					tail = tripset \ {head}
-				in insideGetWaitingTrams(head, tail, stopId, result, time)
-				end
-			else result		
-			end,
-		
-		insideGetWaitingTrams : Trip >< Trip-set >< StopId >< Trip-set >< Time -> Trip-set
-		insideGetWaitingTrams(head, tail, stopId, result, time) is
-			if stationId(head) = stopId 
-				/\ (arrivalTime(head) <= time)
-				/\ (time <= departureTime(head))
-			then getWaitingTramsInit(tail, stopId, result union {head}, time)
-			else getWaitingTramsInit(tail, stopId, result, time) 
-			end,
-		
+			
     	-- 10) All stops of the time table should be defined in the net
      	requirementTen : TimeTable >< Net -> Bool 
      	requirementTen(t, n) is
@@ -218,8 +215,7 @@ class
   		smallestAT : Trip >< Time -> Time
   		smallestAT(head, best) is
   			if arrivalTime(head) < best 
-  			then arrivalTime(head)
-  			else best
+  			then arrivalTime(head) else best
   			end,
   			
   		-- Return arrival time of the first trip
@@ -237,8 +233,7 @@ class
   		biggestDT : Trip >< Time -> Time
   		biggestDT(head, best) is
   			if departureTime(head) > best 
-  			then departureTime(head)
-  			else best
+  			then departureTime(head) else best
   			end,
   			
   		-- Get trip from a set trip using its arrival time
@@ -285,5 +280,96 @@ class
 				then trips(head) union getAllTrips(tail)
 				else trips(head)
 				end
-			 end
+			 end,
+			 
+		-- Function returning the list of trams waiting in one stop at a time t
+		getWaitingTrams : TimeTable >< StopId >< Time -> Trip-set 
+		getWaitingTrams(t, stopId, time) is
+			let trips = getAllTrips(t)
+			in getWaitingTramsInit(trips, stopId, {}, time)
+			end,
+		
+		getWaitingTramsInit : Trip-set >< StopId >< Trip-set >< Time -> Trip-set 
+		getWaitingTramsInit(tripset, stopId, result, time) is		
+			if tripset ~={} 					
+			then let 
+					head = hd tripset,
+					tail = tripset \ {head}
+				in insideGetWaitingTrams(head, tail, stopId, result, time)
+				end
+			else result		
+			end,
+		
+		insideGetWaitingTrams : Trip >< Trip-set >< StopId >< Trip-set >< Time -> Trip-set
+		insideGetWaitingTrams(head, tail, stopId, result, time) is
+			if stationId(head) = stopId 
+				/\ (arrivalTime(head) <= time)
+				/\ (time <= departureTime(head))
+			then getWaitingTramsInit(tail, stopId, result union {head}, time)
+			else getWaitingTramsInit(tail, stopId, result, time) 
+			end,
+			
+		/* FUNCTIONS DEFINING THE NEXT DEPARTURE IN ONE TIME TABLE */
+		
+		-- Return the next departure from a given stopId to another one at a given time 
+		-- in a given timetable
+		nextDeparture : StopId >< StopId >< Time >< TimeTable -> (Plan >< Trip)
+		nextDeparture(id1, id2, time, t) is 
+			nextDepartureLoop(id1, id2, time, t,  mk_Plan("", {}), mk_Trip("", 61, 61)),
+		
+		nextDepartureLoop : StopId >< StopId >< Time >< TimeTable >< Plan >< Trip -> (Plan >< Trip)
+		nextDepartureLoop(id1, id2, time, t, bestPlan, bestTrip ) is 
+			let head = hd t, 
+				tail = t \ {head},
+				emptyTrip = mk_Trip("", 61, 61),
+				formerBestTrip = bestTrip,
+				challengerTrip = bestDepartureOfPlan(head, trips(head), time, id1, id2, emptyTrip), 
+				bestTrip = smallestDT(challengerTrip, bestTrip), -- if new lower then this one
+				bestPlan = updateBestPlan(head, bestTrip, bestPlan, formerBestTrip) -- if value of head and best time, then change it
+			in if tail ~= {}
+				then nextDepartureLoop(id1, id2, time, tail, bestPlan, bestTrip) -- recursion
+				else (bestPlan, bestTrip)
+				end
+			end,
+		
+		-- plan = current plan
+		-- trip = current best time
+		-- fPlan = best plan from the previous iteration
+		-- fTrip = best trip from the previous iteration
+		updateBestPlan : Plan >< Trip >< Plan >< Trip -> Plan
+		updateBestPlan(plan, trip, fPlan, fTrip) is
+			if (departureTime(fTrip) = departureTime(trip))
+			then fPlan 
+			else plan 
+			end,
+		
+		-- returns the bestDepartureTrip of a trip set
+		bestDepartureOfPlan : Plan >< Trip-set >< Time >< StopId >< StopId >< Trip -> Trip
+		bestDepartureOfPlan(plan, p, time, id1, id2, best) is 
+			let head = hd p,
+				tail = p \ {head},
+				best = selectTrip(best, head, time, id1, id2, plan)
+			in	if tail ~= {}
+				then bestDepartureOfPlan(plan, tail, time, id1, id2, best) -- continue recursion 
+				else best -- stop recursion
+				end
+			end,
+			
+		selectTrip : Trip >< Trip >< Time >< StopId >< StopId >< Plan -> Trip
+		selectTrip(best, challenger, time, id1, id2, plan) is
+			if (time < departureTime(challenger)) 
+				/\ (departureTime(challenger) < departureTime(best))
+				/\ (stationId(challenger) = id1)
+				/\ (stationId(getNextTrip(plan, challenger)) = id2)
+			then challenger
+			else best
+			end,
+			
+		smallestDT : Trip >< Trip -> Trip
+		smallestDT(trip1, trip2) is
+			if (departureTime(trip1) <= departureTime(trip2))
+			then trip1 
+			else trip2 
+			end
+			
 end 
