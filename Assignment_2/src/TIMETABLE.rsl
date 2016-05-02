@@ -104,18 +104,21 @@ class
 				(exists p2: Plan :- p2 isin tt /\ p1 ~=p2 /\ tramId(p2) = tramId(p1))
 			 ),
 		
-		-- 5) NOPE
+		-- 5) NOTHING TODO
     
-		-- 6) Respect of connection driving time --TOTEST
+		-- 6) Respect of connection driving time
 		requirementSix : TimeTable >< Net -> Bool 
 		requirementSix(t, n) is	
 			~(exists p : Plan :- p isin t /\
-				(exists trip : Trip :- trip isin trips(p) /\ 
-					((departureTime(trip) - arrivalTime(getNextTrip(p, trip)) 
-						< minDrivingTime(stationId(trip) , stationId(getNextTrip(p, trip)), n))
-					)
-				)
-			),
+				(exists trip : Trip :- trip isin trips(p) /\ ~checkMinDrivingTime(trip, p, n))),
+			
+		checkMinDrivingTime : Trip >< Plan >< Net -> Bool
+		checkMinDrivingTime(trip, p, n) is
+			if departureTime(trip) ~= 60 
+			then minDrivingTime(stationId(trip) , stationId(getNextTrip(p, trip)), n)
+					< (arrivalTime(getNextTrip(p, trip))- departureTime(trip))
+			else true
+			end,					
     
     	-- Set used in order to define the minutes to check
     	-- Used in order to have a correct synthax for nested loops.
@@ -194,9 +197,9 @@ class
      	-- Get the arrival time of a trip
      	getNextTripArrivalTime : Trip-set >< Trip -> Time 
      	getNextTripArrivalTime(p, t) is
-     		if (departureTime(t) = getLastTripDepartureTime(p, 0))
-     		then getFirstTripArrivalTime(p, 61) 
-     		else getNextTripLoop(p, t, 61)
+     		if (departureTime(t) = getLastTripDepartureTime(p, 0)) -- if last trip of the plan
+     		then getFirstTripArrivalTime(p, 61) -- then return the first one
+     		else getNextTripLoop(p, t, 61) -- else return the right one
   			end,
   		
   		-- Return arrival time of the first trip
@@ -238,11 +241,9 @@ class
   		-- Get trip from a set trip using its arrival time
      	getTripByATime : Trip-set >< Time -> Trip
      	getTripByATime(p, aTime) is 
-     		let 
-     			head = hd p, 
+     		let head = hd p, 
      			tail = p \ {head}
-     		in
-     			if arrivalTime(head) = aTime
+     		in 	if arrivalTime(head) = aTime
      			then head
      			else getTripByATime(tail, aTime)
      			end
@@ -278,11 +279,9 @@ class
 			
 		getAllTrips : TimeTable -> Trip-set 
 		getAllTrips(t) is
-			let 
-				head = hd t,
+			let head = hd t,
 				tail = t \ {head}
-			 in 
-				if tail ~={}					
+			 in if tail ~={}					
 				then trips(head) union getAllTrips(tail)
 				else trips(head)
 				end
@@ -369,6 +368,5 @@ class
 			if (departureTime(trip1) <= departureTime(trip2))
 			then trip1 
 			else trip2 
-			end
-			
+			end		
 end 

@@ -117,6 +117,13 @@ extend TIMETABLE with
 					getLastTripDepartureTime(trips, 0) = 60
 				end,
 				
+			/* Should return the number of trains at the station A at the given minute */
+			
+			[GetWaitingTrams]
+				card getWaitingTrams(basicTimetable(), "A", 1) = 1
+				/\ card getWaitingTrams(basicTimetable(), "A", 29) = 1
+				/\ card getWaitingTrams(basicTimetable(), "A", 47) = 0,
+				
 			[GetNextTrip_1]
 				let 
 					--Creating the time table for tram 1
@@ -199,10 +206,21 @@ extend TIMETABLE with
 			[NextDeparture_3] -- time = 2
 			 	nextDeparture("B", "A", time, basicTimetable()),
 			 	
-			[CheckHeadway_1]
-				false, --TODO
+			[CheckMinDrivingTime_1]
+				let one = mk_Trip("A", 0, 1),
+					two = mk_Trip("B", 12, 14),
+					trips = {one, two},
+					plan = mk_Plan("tram1", trips),
+					n = basicExample()
+				in 	checkMinDrivingTime(one, plan, basicExample())
+				end,
 				
-			[CheckHeadway_2]
-				false --TODO
+			[CheckMinDrivingTime_2]
+				let one = mk_Trip("A", 0, 1),
+					two = mk_Trip("B", 9, 14),
+					trips = {one, two},
+					plan = mk_Plan("tram1", trips)
+				in checkMinDrivingTime(one, plan, basicExample()) = false 
+				end
 				
 end
