@@ -7,7 +7,5 @@ Colouring/ColouringBasics.rsl.el
 *.results
 Assignment_2/src/testTIMETABLE.rsl~
 *.rsl~
-*.rsl~
-*.rsl~
-*.rsl~
-*.rsl~
+*.pvs
+
