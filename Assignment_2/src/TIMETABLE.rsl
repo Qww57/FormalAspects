@@ -89,8 +89,7 @@ class
 				else false
 			end,
 			
-
-		-- 3) All values should be between zero and 60
+		-- 3) All values should be between 0 and 60
 		areValuesinRange: TimeTable -> Bool
 		areValuesinRange(tt) is
 			~(exists plan : Plan :- plan isin tt /\
@@ -268,8 +267,15 @@ class
 			else getNextTripLoop(tail, t , best)  	
 			end,	
 			
-		/* END OF GET NEXT TRIP FUNCTION */
-		
+		/* FUNCTION USED IN ORDER TO GET TRAMS WAITING IN A STOP */
+			 
+		-- Function returning the list of trams waiting in one stop at a time t
+		getWaitingTrams : TimeTable >< StopId >< Time -> Trip-set 
+		getWaitingTrams(t, stopId, time) is
+			let trips = getAllTrips(t)
+			in getWaitingTramsInit(trips, stopId, {}, time)
+			end,
+			
 		getAllTrips : TimeTable -> Trip-set 
 		getAllTrips(t) is
 			let 
@@ -281,13 +287,6 @@ class
 				else trips(head)
 				end
 			 end,
-			 
-		-- Function returning the list of trams waiting in one stop at a time t
-		getWaitingTrams : TimeTable >< StopId >< Time -> Trip-set 
-		getWaitingTrams(t, stopId, time) is
-			let trips = getAllTrips(t)
-			in getWaitingTramsInit(trips, stopId, {}, time)
-			end,
 		
 		getWaitingTramsInit : Trip-set >< StopId >< Trip-set >< Time -> Trip-set 
 		getWaitingTramsInit(tripset, stopId, result, time) is		
@@ -324,10 +323,10 @@ class
 				emptyTrip = mk_Trip("", 61, 61),
 				formerBestTrip = bestTrip,
 				challengerTrip = bestDepartureOfPlan(head, trips(head), time, id1, id2, emptyTrip), 
-				bestTrip = smallestDT(challengerTrip, bestTrip), -- if new lower then this one
-				bestPlan = updateBestPlan(head, bestTrip, bestPlan, formerBestTrip) -- if value of head and best time, then change it
+				bestTrip = smallestDT(challengerTrip, bestTrip), 
+				bestPlan = updateBestPlan(head, bestTrip, bestPlan, formerBestTrip) 
 			in if tail ~= {}
-				then nextDepartureLoop(id1, id2, time, tail, bestPlan, bestTrip) -- recursion
+				then nextDepartureLoop(id1, id2, time, tail, bestPlan, bestTrip) 
 				else (bestPlan, bestTrip)
 				end
 			end,
