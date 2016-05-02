@@ -11,8 +11,8 @@ class
 	    	   trips : Trip-set <-> new_trips,
     
     	Trip:: stationId :StopId 
-	   		arrivalTime : Time
-	   		departureTime: Time,
+	   		   arrivalTime : Time
+	   		   departureTime: Time,
 	   		
 	   	/* Simple predefined types */
 
@@ -73,8 +73,7 @@ class
    		--isWellformed : TimeTable >< Net -> Bool
      	--isWellformed(t, n) is ...,
 			
-		/* requirement that check if departure time and arrival time are not equal */	
-		
+		-- 1) Arrival time and departure time of the same trip cannot be equals		
 		isADTimeAreDifferent: Trip -> Bool
 		isADTimeAreDifferent(trip) is
 				if( arrivalTime(trip) ~= departureTime(trip))
@@ -82,9 +81,7 @@ class
 				else false
 			end,				
 		
-		/* requirement that check that departure time
-			should not be before arrival time  */
-		
+		-- 2) The departure time  shouldn’t be before  arrival time
 		isATimeBeforeDTime: Trip -> Bool
 		isATimeBeforeDTime(trip) is
 				if( arrivalTime(trip) < departureTime(trip))
@@ -92,13 +89,26 @@ class
 				else false
 			end,
 			
-		/* requirement that check if all the values are in range between 0 and 60  */
-		
-		areValuesinRange: Plan -> Bool
-		areValuesinRange(plan) is
-			~(exists trip : Trip :- trip isin trips(plan) /\ (arrivalTime(trip) < 0 \/
-				arrivalTime(trip) > 60 \/ departureTime(trip) < 0 \/ departureTime(trip) > 60)),
-    
+		-- 3) All values should be between zero and 60
+		areValuesinRange: TimeTable -> Bool
+		areValuesinRange(tt) is
+			~(exists plan : Plan :- plan isin tt /\
+				(exists trip : Trip :- trip isin trips(plan) /\ 
+					(arrivalTime(trip) > 60 \/ departureTime(trip) > 60))
+			 ),
+			  
+		-- 4) There should be only one plan per tram	  
+		onlyOnePlan: TramId >< TimeTable -> Bool
+		onlyOnePlan(trId, tt) is
+			~(exists p1 : Plan :- p1 isin tt /\ tramId(p1) = trId /\
+				(exists p2: Plan :- p2 isin tt /\ p1 ~=p2 /\ tramId(p2) = tramId(p1))
+			 ),
+		/*
+		-- 5) 
+		consistentTramAndTable: StopId >< StopId >< Net ><TimeTable -> Bool
+		consistentTramAndTable(s1, s2, net, tt) is
+			(exists plan : Plan :- plan isin tt /\ arrivalTime(trip2) >  
+		*/
     	-- 10) All stops of the time table should be defined in the net
      	requirementTen : TimeTable >< Net -> Bool 
      	requirementTen(t, n) is

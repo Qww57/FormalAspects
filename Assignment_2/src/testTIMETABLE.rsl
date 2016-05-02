@@ -183,21 +183,53 @@ extend TIMETABLE with
 			
 			[areValuesinRange_1] 
 				let
+					tt = {mk_Plan("TramA",{mk_Trip("A",0,2)})},
 					plan = mk_Plan("TramA",{mk_Trip("A",0,2)})			
 				in 
-					areValuesinRange(plan) = true
+					areValuesinRange(tt) = true
 				end,
 			
 			/* Should return false because values are not between 0 and 60 */	
 			
 			[areValuesinRange_2] 
 				let
-					plan = mk_Plan("TramA",{mk_Trip("A",61,62), mk_Trip("A",0,2)})			
+					
+					tt = {mk_Plan("TramA",{mk_Trip("A",61,62), mk_Trip("A",0,2)})}			
 				in 
-					areValuesinRange(plan) = false
+					areValuesinRange(tt) = false
 				end,
 				
-						/* Should return true since all stops defined in trips are also defined in the net */
+			/* Should return true because we have only one plan for TramA */
+			
+			[onlyOnePlan_1] 
+				let
+					tt = {mk_Plan("TramA",{mk_Trip("A",0,2)}), mk_Plan("TramB",{mk_Trip("B",12,24)})},
+					trId = "TramA"			
+				in 
+					onlyOnePlan(trId, tt) = true
+				end,
+			
+			/* Should return false because we have two plan for one tram */
+			
+			[onlyOnePlan_2] 
+				let
+					tt = {mk_Plan("TramA",{mk_Trip("A",0,2)}), mk_Plan("TramA",{mk_Trip("B",12,24)})},
+					trId = "TramA"			
+				in 
+					onlyOnePlan(trId, tt) = false
+				end,
+			
+			/* Should return true because we dont have any plan for TramA */
+			
+			[onlyOnePlan_3] 
+				let
+					tt = {mk_Plan("TramA",{mk_Trip("B",12,24)})},
+					trId = "TramA"			
+				in 
+					onlyOnePlan(trId, tt) = true
+				end,
+			
+			/* Should return true since all stops defined in trips are also defined in the net */
 			
 			[requirementTen_1]
 				requirementTen(basicTimetable(), basicExample()) = true,
