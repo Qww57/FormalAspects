@@ -101,10 +101,12 @@ class
 		onlyOnePlan: TramId >< TimeTable -> Bool
 		onlyOnePlan(trId, tt) is
 			~(exists p1 : Plan :- p1 isin tt /\ tramId(p1) = trId /\
-				(exists p2: Plan :- p2 isin tt /\ p1 ~=p2 /\ tramId(p2) = tramId(p1))
-			 ),
+				(exists p2: Plan :- p2 isin tt /\ p1 ~=p2 /\ tramId(p2) = tramId(p1))),
 		
-		-- 5) NOTHING TODO
+		-- 5) There should not be any empty plan
+		requirementFive : TimeTable -> Bool
+		requirementFive(t) is
+			~(exists p : Plan :- p isin t /\ card trips(p) < 2),
     
 		-- 6) Respect of connection driving time
 		requirementSix : TimeTable >< Net -> Bool 
@@ -131,21 +133,30 @@ class
     	requirementSeven(t, n) is
     		~(exists s : Stop :- s isin Stops(n) /\ 
     			(exists time : Time :- time isin Times /\
-    				(card getWaitingTrams(t, stopId(s), time) > capacity(stopId(s), n))
-    			)
-    		), 
+    				(card getWaitingTrams(t, stopId(s), time) > capacity(stopId(s), n)))), 
     		
     	-- 8) Respect of connection capacity 
     	requirementEight : TimeTable >< Net -> Bool 
 		requirementEight(t, n) is	
-			false, --TODO
+			~(exists time : Time :- time isin Times /\
+				(exists c : Connection :- c isin Connections(n) 
+					/\ ~checkCapacity(c, t, time, n))),
+								
+		checkCapacity : Connection >< TimeTable >< Time >< Net -> Bool
+		checkCapacity(c, t, time, n) is
+			let head = hd Stops(c),
+				tail = hd (Stops(c) \ {head}),
+				id1 = stopId(head),
+				id2 = stopId(tail)
+			in (card getTramsOn(t, id1, id2, time) + card getTramsOn(t, id2, id1, time)) 
+				< capacity(id1, id2, n)
+			end,
 						
 		-- 9) Respect of connection headway
 		requirementNine : TimeTable >< Net -> Bool
 		requirementNine(t, n) is
 			~(exists p : Plan :- p isin t /\
-				(exists trip : Trip :- trip isin trips(p) /\ ~checkHeadway(p, trip, t, n))
-			),
+				(exists trip : Trip :- trip isin trips(p) /\ ~checkHeadway(p, trip, t, n))),
 		
 		-- Return true if the trip and its next departure in the right direction according 
 		-- to the time table and the net are respecting the headway of the connection
@@ -162,12 +173,12 @@ class
     	-- 10) All stops of the time table should be defined in the net
      	requirementTen : TimeTable >< Net -> Bool 
      	requirementTen(t, n) is
-     		~(exists p : Plan :- p isin t /\ stopDefinition(p, n)),
+     		~(exists p : Plan :- p isin t /\ ~stopDefinition(p, n)),
      	
      	-- All stops of the trips of the plan are defined in the net 
      	stopDefinition : Plan >< Net -> Bool
      	stopDefinition(p, n) is 
-     		~(exists t : Trip :- t isin trips(p) /\ isIn(stationId(t), n)),
+     		~(exists t : Trip :- t isin trips(p) /\ ~isIn(stationId(t), n)),
      		
      	-- 11) All stops of the net are used at least once in the time table
      	requirementEleven : TimeTable >< Net -> Bool
@@ -181,9 +192,7 @@ class
      		~(exists p : Plan :- p isin t /\ 
      			(exists trip : Trip :- trip isin trips(p) /\ 
      				~areDirectlyConnected(stationId(trip), stationId(getNextTrip(p, trip)), n)
-     				/\ departureTime(trip) ~= getLastTripDepartureTime(trips(p), 0)
-     			)
-     		),
+     				/\ departureTime(trip) ~= getLastTripDepartureTime(trips(p), 0))),
      		
      	/* Auxiliary functions used in order to get the next trip of a given trip in a plan */	
      	
@@ -266,7 +275,7 @@ class
      		if (departureTime(t) < arrivalTime(head) /\ arrivalTime(head) < best)
 			then getNextTripLoop(tail, t , arrivalTime(head))
 			else getNextTripLoop(tail, t , best)  	
-			end,	
+			end,
 			
 		/* FUNCTION USED IN ORDER TO GET TRAMS WAITING IN A STOP */
 			 
@@ -276,7 +285,8 @@ class
 			let trips = getAllTrips(t)
 			in getWaitingTramsInit(trips, stopId, {}, time)
 			end,
-			
+		
+		-- Returns the list of all trips in the time table
 		getAllTrips : TimeTable -> Trip-set 
 		getAllTrips(t) is
 			let head = hd t,
@@ -307,13 +317,48 @@ class
 			else getWaitingTramsInit(tail, stopId, result, time) 
 			end,
 			
+		/* FUNCTION USED IN ORDER TO GET TRAMS ON A CONNECTION */
+		
+		-- Returns the list of trams on a connection at a given time in a time table
+		getTramsOn : TimeTable >< StopId >< StopId >< Time -> Trip-set
+		getTramsOn(t, id1, id2, time) is 
+			let head = hd t, 
+				tail = t \ {head}
+			in  if tail ~= {}
+				then getTramsInPlan(head, trips(head), id1, id2, time, {}) 
+					union getTramsOn(tail, id1, id2, time)
+				else getTramsInPlan(head, trips(head), id1, id2, time, {}) 
+				end
+			end,
+			
+		-- Returns the list of trams on a connection at a given time in a plan
+		getTramsInPlan : Plan >< Trip-set >< StopId >< StopId >< Time >< Trip-set -> Trip-set
+		getTramsInPlan(p, trips, id1, id2, time, result) is
+			if trips ~= {}
+			then let head = hd trips, 
+				 	 tail = trips \ {head}
+				 in  insideGetTramsInPlan(p, tail, id1, id2, time, result, head)
+				 end
+			else result
+			end,
+			
+		insideGetTramsInPlan : Plan >< Trip-set >< StopId >< StopId >< Time 
+								>< Trip-set >< Trip -> Trip-set
+		insideGetTramsInPlan(p, trips, id1, id2, time, result, head) is
+			if (stationId(head) = id1) /\ (stationId(getNextTrip(p, head)) = id2)
+				/\ (departureTime(head) < time) 
+				/\ (time < arrivalTime(getNextTrip(p, head)))
+			then getTramsInPlan(p, trips, id1, id2, time, result union {head})
+			else getTramsInPlan(p, trips, id1, id2, time, result)
+			end,
+			
 		/* FUNCTIONS DEFINING THE NEXT DEPARTURE IN ONE TIME TABLE */
 		
 		-- Return the next departure from a given stopId to another one at a given time 
 		-- in a given timetable
 		nextDeparture : StopId >< StopId >< Time >< TimeTable -> (Plan >< Trip)
 		nextDeparture(id1, id2, time, t) is 
-			nextDepartureLoop(id1, id2, time, t,  mk_Plan("", {}), mk_Trip("", 61, 61)),
+			nextDepartureLoop(id1, id2, time, t, mk_Plan("", {}), mk_Trip("", 61, 61)),
 		
 		nextDepartureLoop : StopId >< StopId >< Time >< TimeTable >< Plan >< Trip -> (Plan >< Trip)
 		nextDepartureLoop(id1, id2, time, t, bestPlan, bestTrip ) is 

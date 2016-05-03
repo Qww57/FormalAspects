@@ -49,6 +49,30 @@ extend TIMETABLE with
 					
 		test_case
 		
+			[TIMETABLE_1]
+				"1) Tests on the predicate and their auxiliary functions",
+				
+			/* Should return true because becuase we want to get plan2 */
+			
+			[getPlanByTramId_1] 
+				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
+					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+					tt = {plan1, plan2}	
+				in  getPlanByTramId("TramB", tt) = plan2
+				end,
+			
+			/* Should return true because becuase we want to get plan2 */
+			
+			[getPlanByTramId_2] 
+				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
+					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+					tt = {plan1, plan2}			
+				in 	getPlanByTramId("TramC", tt) 
+				end,
+
+			[TIMETABLE_2]
+				"2) Tests on the generators and their auxiliary functions",
+		
 			/* Adding a plan for a tram to time table, it should
 				return true because we have to have 2 elements after adding*/
 			
@@ -70,24 +94,6 @@ extend TIMETABLE with
 			[isIn_2] 
 				let tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
 				in  isIn("TramA", tt) = false
-				end,
-			
-			/* Should return true because becuase we want to get plan2 */
-			
-			[getPlanByTramId_1] 
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					tt = {plan1, plan2}	
-				in  getPlanByTramId("TramB", tt) = plan2
-				end,
-			
-			/* Should return true because becuase we want to get plan2 */
-			
-			[getPlanByTramId_2] 
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					tt = {plan1, plan2}			
-				in 	getPlanByTramId("TramC", tt) 
 				end,
 					
 			/* Should return true because becuase we add stop to plan
@@ -122,6 +128,9 @@ extend TIMETABLE with
 			
 			[stopIsIn_2]
 				stopIsIn("E", basicTimetable()) = false,
+				
+			[TIMETABLE_3]
+				"3) Tests on the predicate, auxiliary functions are in testTIMETABLEAux",
 
 			/* Should return true because arrival time and 
 				departure time are different */
@@ -194,6 +203,17 @@ extend TIMETABLE with
 				in 	onlyOnePlan(trId, tt) = true
 				end,
 				
+			/* Should return true since all plans have trips */
+				
+			[requirementFive_1]	
+				requirementFive(basicTimetable()) = true,
+			
+			/* Should return true since all plans have trips */
+			[requirementFive_2]
+				let t = {mk_Plan("TramA",{})}
+				in 	requirementFive(t) = false
+				end,
+				
 			/* Should return true since the example respects the minimum driving time */
 								
 			[RequirementSix_1]
@@ -228,7 +248,7 @@ extend TIMETABLE with
 			/* Should return true since the example respects the connection capacities */
 				
 			[RequirementEight_1]
-				false, --TODO requirementEight(basicTimetable(), basicExample()) = true, 
+				requirementEight(basicTimetable(), basicExample()) = true, 
 			
 			/* Should return false since it does not respect the capacity (3) of B to C */
 			
@@ -237,7 +257,7 @@ extend TIMETABLE with
 					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5), mk_Trip("C",12, 15)}),
 					plan3 = mk_Plan("TramC",{mk_Trip("B",1,4), mk_Trip("C",15, 20)}),
 					t = {plan1, plan2, plan3}
-				in  false --TODO requirementEight(t, basicExample()) = false
+				in  requirementEight(t, basicExample()) = false
 				end,
 				
 			/* Should return true since the example respects the connection headways */
