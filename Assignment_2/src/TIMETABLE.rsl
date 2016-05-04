@@ -121,24 +121,18 @@ class
 					< (arrivalTime(getNextTrip(p, trip))- departureTime(trip))
 			else true
 			end,					
-    
-    	-- Set used in order to define the minutes to check
-    	-- Used in order to have a correct synthax for nested loops.
-    	Times : Time-set = {0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,
-    						26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
-    						48,49,50,51,52,53,54,55,56,57,58,59,60},
-    	
+        	
     	-- 7) Respect of stop capacity
     	requirementSeven : TimeTable >< Net -> Bool
     	requirementSeven(t, n) is
     		~(exists s : Stop :- s isin Stops(n) /\ 
-    			(exists time : Time :- time isin Times /\
+    			(exists time : Time :- time isin {0..60} /\
     				(card getWaitingTrams(t, stopId(s), time) > capacity(stopId(s), n)))), 
     		
     	-- 8) Respect of connection capacity 
     	requirementEight : TimeTable >< Net -> Bool 
 		requirementEight(t, n) is	
-			~(exists time : Time :- time isin Times /\
+			~(exists time : Time :- time isin {0..60} /\
 				(exists c : Connection :- c isin Connections(n) 
 					/\ ~checkCapacity(c, t, time, n))),
 								
