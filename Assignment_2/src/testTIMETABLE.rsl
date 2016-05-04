@@ -42,7 +42,7 @@ extend TIMETABLE with
 					trip_d = mk_Trip("B", 47, 50),
 					trip_e = mk_Trip("D", 58, 60),
 					trips_bis = {trip_a, trip_b, trip_c, trip_d, trip_e},
-					plan_two = mk_Plan("tram1", trips_bis)
+					plan_two = mk_Plan("tram2", trips_bis)
 				in 
 					{plan_one, plan_two}
 				end	
@@ -52,7 +52,7 @@ extend TIMETABLE with
 			[TIMETABLE_1]
 				"1) Tests on the predicate and their auxiliary functions",
 				
-			/* Should return true because becuase we want to get plan2 */
+			/* Should return true because we want to get plan 2 */
 			
 			[getPlanByTramId_1] 
 				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
@@ -61,13 +61,13 @@ extend TIMETABLE with
 				in  getPlanByTramId("TramB", tt) = plan2
 				end,
 			
-			/* Should return true because becuase we want to get plan2 */
+			/* Should return an empty plan because we want to get a tram without plan */
 			
 			[getPlanByTramId_2] 
 				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
 					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
 					tt = {plan1, plan2}			
-				in 	getPlanByTramId("TramC", tt) 
+				in 	getPlanByTramId("TramC", tt) = mk_Plan("", {})
 				end,
 
 			[TIMETABLE_2]
@@ -131,37 +131,18 @@ extend TIMETABLE with
 				
 			[TIMETABLE_3]
 				"3) Tests on the predicate, auxiliary functions are in testTIMETABLEAux",
-
-			/* Should return true because arrival time and 
-				departure time are different */
 			
-			[isADTimeAreDifferent_1] 
-				let trip = mk_Trip("C",12,24)			
-				in 	isADTimeAreDifferent(trip)= true
-				end,
-			
-			/* Should return false because arrival time and 
-				departure time are same */	
-			
-			[isADTimeAreDifferent_2] 
-				let	trip = mk_Trip("C",12,12)			
-				in 	isADTimeAreDifferent(trip)= false
-				end,
-			
-			/* Should return true because arrival time is before 
-				departure time */		
+			/* Should return true since basic timetable has correct values */		
 				
-			[isATimeBeforeDTime_1] 
-				let	trip = mk_Trip("C",12,24)			
-				in 	isATimeBeforeDTime(trip)= true
-				end,
+			[isATimeBeforeDTime_1] 		
+				isATimeBeforeDTime(basicTimetable())= true,
 			
-			/* Should return false because departure time is before 
-				arrival time */
+			/* Should return false because departure time is before arrival time */
 			
 			[isATimeBeforeDTime_2] 
-				let trip = mk_Trip("C",24,12)			
-				in 	isATimeBeforeDTime(trip)= false
+				let plan1 = mk_Plan("TramA",{mk_Trip("A",5,3), mk_Trip("B",10,20)}),
+					t = {plan1}				
+				in 	isATimeBeforeDTime(t) = false
 				end,
 			
 			/* Should return true because values are between 0 and 60 */
@@ -182,26 +163,16 @@ extend TIMETABLE with
 			/* Should return true because we have only one plan for TramA */
 			
 			[onlyOnePlan_1] 
-				let tt = {mk_Plan("TramA",{mk_Trip("A",0,2)}), mk_Plan("TramB",{mk_Trip("B",12,24)})},
-					trId = "TramA"			
-				in 	onlyOnePlan(trId, tt) = true
-				end,
+				onlyOnePlan(basicTimetable()) = true,	
 			
-			/* Should return false because we have two plan for one tram */
+			/* Should return false because we have two plan for tram A */
 			
 			[onlyOnePlan_2] 
-				let tt = {mk_Plan("TramA",{mk_Trip("A",0,2)}), mk_Plan("TramA",{mk_Trip("B",12,24)})},
-					trId = "TramA"			
-				in  onlyOnePlan(trId, tt) = false
-				end,
-			
-			/* Should return true because we dont have any plan for TramA */
-			
-			[onlyOnePlan_3] 
-				let	tt = {mk_Plan("TramA",{mk_Trip("B",12,24)})},
-					trId = "TramA"			
-				in 	onlyOnePlan(trId, tt) = true
-				end,
+				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("B",10,20)}),
+					plan2 = mk_Plan("TramA",{mk_Trip("B",1,5)}),
+					t = {plan1, plan2}				
+				in 	onlyOnePlan(t) = false
+				end,				
 				
 			/* Should return true since all plans have trips */
 				

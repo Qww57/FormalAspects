@@ -57,37 +57,33 @@ class
 		/* Auxiliary functions for the Observers and Generators */
 	
 		getPlanByTramId: TramId >< TimeTable -> Plan
-		getPlanByTramId(trId, tt) is
+		getPlanByTramId(trId, t) is
 			let 
-				head = hd tt,
-	    		tail = tt \ {head} 		
+				head = hd t,
+	    		tail = t \ {head} 		
 	    	in
 	    		if trId = tramId(head)
 	    		then head 
-	    		else getPlanByTramId(trId, tail)
+	    		else if tail ~= {}
+					 then getPlanByTramId(trId, tail)
+					 else mk_Plan("", {})
+					 end
 	    		end
 			end
 
  	 value /* predicates to check time tables */   
    		
    		--isWellformed : TimeTable >< Net -> Bool
-     	--isWellformed(t, n) is ...,
-			
-		-- 1) Arrival time and departure time of the same trip cannot be equals		
-		isADTimeAreDifferent: Trip -> Bool
-		isADTimeAreDifferent(trip) is
-				if(arrivalTime(trip) ~= departureTime(trip))
-				then true
-				else false
-			end,				
+     	--isWellformed(t, n) is ...,			
 		
 		-- 2) The departure time  shouldn't be before  arrival time
-		isATimeBeforeDTime: Trip -> Bool
-		isATimeBeforeDTime(trip) is
-				if(arrivalTime(trip) < departureTime(trip))
-				then true
-				else false
-			end,
+		isATimeBeforeDTime: TimeTable -> Bool
+		isATimeBeforeDTime(t) is
+				~(exists plan: Plan :- plan isin t /\ 
+					(exists trip:Trip :- trip isin trips(plan) /\
+						arrivalTime(trip) > departureTime(trip)
+					)
+				),
 			
 		-- 3) All values should be between 0 and 60
 		areValuesinRange: TimeTable -> Bool
@@ -98,10 +94,11 @@ class
 			 ),
 			  
 		-- 4) There should be only one plan per tram	  
-		onlyOnePlan: TramId >< TimeTable -> Bool
-		onlyOnePlan(trId, tt) is
-			~(exists p1 : Plan :- p1 isin tt /\ tramId(p1) = trId /\
-				(exists p2: Plan :- p2 isin tt /\ p1 ~=p2 /\ tramId(p2) = tramId(p1))),
+		onlyOnePlan: TimeTable -> Bool
+		onlyOnePlan(t) is
+			~(exists p1 : Plan :- p1 isin t /\ 
+				(exists p2: Plan :- p2 isin t 
+					/\ p1 ~= p2 /\ tramId(p2) = tramId(p1))),
 		
 		-- 5) There should not be any empty plan
 		requirementFive : TimeTable -> Bool
