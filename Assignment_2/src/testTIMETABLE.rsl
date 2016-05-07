@@ -5,287 +5,308 @@ TIMETABLE
  */
 scheme testTIMETABLE =
 extend TIMETABLE with 
-	class	
-		value
-			--Example of the project description for a well defined net
-			basicExample : Unit -> Net
-			basicExample() is 
-				let
-				a = mk_Stop("A", 2),
-				b = mk_Stop("B", 3),
-				c = mk_Stop("C", 2),
-				d = mk_Stop("D", 2),
-				c1 = mk_Connection(3, 10, 2, {a, b}),
-				c2 = mk_Connection(3, 12, 4, {b, c}),
-				c3 = mk_Connection(2, 7, 4, {b, d})			
-			in 
-				mk_Net({a, b, c, d}, {c1, c2, c3})
-			end,	
-		
-			--Example of the project description for a well defined net
-			basicTimetable : Unit -> TimeTable
-			basicTimetable() is 
-				let
-					--Creating the time table for tram 1
-					trip_one = mk_Trip("A", 0, 1),
-					trip_two = mk_Trip("B", 12, 14),
-					trip_three = mk_Trip("C", 28, 32),
-					trip_four = mk_Trip("B", 46, 48),
-					trip_five = mk_Trip("A", 59, 60),
-					trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
-					plan_one = mk_Plan("tram1", trips),
-					
-					--Creating the time table for tram 2
-					trip_a = mk_Trip("D", 0, 2),
-					trip_b = mk_Trip("B", 11, 13),
-					trip_c = mk_Trip("A", 28, 32),
-					trip_d = mk_Trip("B", 47, 50),
-					trip_e = mk_Trip("D", 58, 60),
-					trips_bis = {trip_a, trip_b, trip_c, trip_d, trip_e},
-					plan_two = mk_Plan("tram2", trips_bis)
-				in 
-					{plan_one, plan_two}
-				end	
-					
-		test_case
-		
-			[TIMETABLE_1]
-				"1) Tests on the predicate and their auxiliary functions",
-				
-			/* Should return true because we want to get plan 2 */
-			
-			[getPlanByTramId_1] 
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					tt = {plan1, plan2}	
-				in  getPlanByTramId("TramB", tt) = plan2
-				end,
-			
-			/* Should return an empty plan because we want to get a tram without plan */
-			
-			[getPlanByTramId_2] 
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					tt = {plan1, plan2}			
-				in 	getPlanByTramId("TramC", tt) = mk_Plan("", {})
-				end,
+class	
+	value
+	
+	--Example of the project description for a well defined net
+	basicExample : Unit -> Net
+	basicExample() is 
+		let
+		a = mk_Stop("A", 2),
+		b = mk_Stop("B", 3),
+		c = mk_Stop("C", 2),
+		d = mk_Stop("D", 2),
+		c1 = mk_Connection(3, 10, 2, {a, b}),
+		c2 = mk_Connection(3, 12, 4, {b, c}),
+		c3 = mk_Connection(2, 7, 4, {b, d})			
+	in 
+		mk_Net({a, b, c, d}, {c1, c2, c3})
+	end,	
 
-			[TIMETABLE_2]
-				"2) Tests on the generators and their auxiliary functions",
-		
-			/* Adding a plan for a tram to time table, it should
-				return true because we have to have 2 elements after adding*/
+	--Example of the project description for a well defined net
+	basicTimetable : Unit -> TimeTable
+	basicTimetable() is 
+		let
+			--Creating the time table for tram 1
+			trip_one = mk_Trip("A", 0, 1),
+			trip_two = mk_Trip("B", 12, 14),
+			trip_three = mk_Trip("C", 28, 32),
+			trip_four = mk_Trip("B", 46, 48),
+			trip_five = mk_Trip("A", 59, 60),
+			trips = {trip_one, trip_two, trip_three, trip_four, trip_five},
+			plan_one = mk_Plan("tram1", trips),
 			
-			[addTram_1] 
-				let trId = "TramB",
-					tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
-				in  card addTram(trId, tt) = 2
-				end,
-			
-			/* Should return true because TramB is in time table */	
-			
-			[isIn_1] 
-				let tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
-				in  isIn("TramB", tt) = true
-				end,
-				
-			/* Should return false because TramB is not in time table */
-			
-			[isIn_2] 
-				let tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
-				in  isIn("TramA", tt) = false
-				end,
+			--Creating the time table for tram 2
+			trip_a = mk_Trip("D", 0, 2),
+			trip_b = mk_Trip("B", 11, 13),
+			trip_c = mk_Trip("A", 28, 32),
+			trip_d = mk_Trip("B", 47, 50),
+			trip_e = mk_Trip("D", 58, 60),
+			trips_bis = {trip_a, trip_b, trip_c, trip_d, trip_e},
+			plan_two = mk_Plan("tram2", trips_bis)
+		in 
+			{plan_one, plan_two}
+		end	
 					
-			/* Should return true because becuase we add stop to plan
-				and we should have two trip in the plan after adding*/
-			[addStop_1] 
-				let trId="TramA", 
-					sId="B", 
-					at= 12, 
-					dt= 24, 
-					tt = {mk_Plan("TramA",{mk_Trip("A",0,2)})}			
-				in  addStop(trId, sId, at, dt, tt) = {mk_Plan("TramA",{mk_Trip("B",12,24),mk_Trip("A",0,2)})}
-				end,
-				
-			/* Should return true because becuase we added a stop which
-			is already exist in plan */
+	test_case
+
+	[TIMETABLE_1]
+		"1) Tests on the predicate and their auxiliary functions",
+		
+	/* Should return true because we want to get plan 2 */
+	
+	[getPlanByTramId_1] 
+		let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+			tt = {plan1, plan2}	
+		in  getPlanByTramId("TramB", tt) = plan2
+		end,
+	
+	/* Should return an empty plan because we want to get a tram without plan */
+	
+	[getPlanByTramId_2] 
+		let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+			tt = {plan1, plan2}			
+		in 	getPlanByTramId("TramC", tt) = mk_Plan("", {})
+		end,
+
+	[TIMETABLE_2]
+		"2) Tests on the generators and their auxiliary functions",
+
+	/* Adding a plan for a tram to time table, it should
+		return true because we have to have 2 elements after adding*/
+	
+	[addTram_1] 
+		let trId = "TramB",
+			tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+		in  card addTram(trId, tt) = 2
+		end,
+	
+	/* Should return true because TramB is in time table */	
+	
+	[isIn_1] 
+		let tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+		in  isIn("TramB", tt) = true
+		end,
+		
+	/* Should return false because TramB is not in time table */
+	
+	[isIn_2] 
+		let tt = {mk_Plan("TramB",{mk_Trip("A",0,2)})}			
+		in  isIn("TramA", tt) = false
+		end,
 			
-			[addStop_2] 
-				let trId="TramA", 
-					sId="C", 
-					at= 12, 
-					dt= 24, 
-					tt = {mk_Plan("TramA",{mk_Trip("C",12,24)})}			
-				in  addStop(trId, sId, at, dt, tt)= {mk_Plan("TramA",{mk_Trip("C",12,24)})}
-				end,
-			
-			/* Should return true, since the stop C is in the time table */
-				
-			[stopIsIn_1]
-				stopIsIn("C", basicTimetable()) = true,
-				
-			/* Should return false, since the stop A is not in the time table */
-			
-			[stopIsIn_2]
-				stopIsIn("E", basicTimetable()) = false,
-				
-			[TIMETABLE_3]
-				"3) Tests on the predicate, auxiliary functions are in testTIMETABLEAux",
-			
-			/* Should return true since basic timetable has correct values */		
-				
-			[isATimeBeforeDTime_1] 		
-				isATimeBeforeDTime(basicTimetable())= true,
-			
-			/* Should return false because departure time is before arrival time */
-			
-			[isATimeBeforeDTime_2] 
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",5,3), mk_Trip("B",10,20)}),
-					t = {plan1}				
-				in 	isATimeBeforeDTime(t) = false
-				end,
-			
-			/* Should return true because values are between 0 and 60 */
-			
-			[areValuesinRange_1] 
-				let tt = {mk_Plan("TramA",{mk_Trip("A",0,2)})},
-					plan = mk_Plan("TramA",{mk_Trip("A",0,2)})			
-				in 	areValuesinRange(tt) = true
-				end,
-			
-			/* Should return false because values are not between 0 and 60 */	
-			
-			[areValuesinRange_2] 
-				let tt = {mk_Plan("TramA",{mk_Trip("A",61,62), mk_Trip("A",0,2)})}			
-				in  areValuesinRange(tt) = false
-				end,
-				
-			/* Should return true because we have only one plan for TramA */
-			
-			[onlyOnePlan_1] 
-				onlyOnePlan(basicTimetable()) = true,	
-			
-			/* Should return false because we have two plan for tram A */
-			
-			[onlyOnePlan_2] 
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("B",10,20)}),
-					plan2 = mk_Plan("TramA",{mk_Trip("B",1,5)}),
-					t = {plan1, plan2}				
-				in 	onlyOnePlan(t) = false
-				end,				
-				
-			/* Should return true since all plans have trips */
-				
-			[requirementFive_1]	
-				requirementFive(basicTimetable()) = true,
-			
-			/* Should return true since all plans have trips */
-			[requirementFive_2]
-				let t = {mk_Plan("TramA",{})}
-				in 	requirementFive(t) = false
-				end,
-				
-			/* Should return true since the example respects the minimum driving time */
+	/* Should return true because becuase we add stop to plan
+		and we should have two trip in the plan after adding*/
+	[addStop_1] 
+		let tt = {mk_Plan("TramA",{mk_Trip("A",0,2)})}, 
+			expected = {mk_Plan("TramA", {mk_Trip("B",12,24),
+									      mk_Trip("A",0,2)})}			
+		in  addStop("TramA", "B", 12, 24, tt) = expected
+		end,
+		
+	/* Returns the initial time table since the trip already exists in plan */
+	
+	[addStop_2] 
+		let tt = {mk_Plan("TramA",{mk_Trip("C", 12, 24)})}			
+		in  addStop("TramA", "C", 12, 24, tt)= tt
+		end,
+	
+	/* Should return true, since the stop C is in the time table */
+		
+	[stopIsIn_1]
+		stopIsIn("C", basicTimetable()) = true,
+		
+	/* Should return false, since the stop A is not in the time table */
+	
+	[stopIsIn_2]
+		stopIsIn("E", basicTimetable()) = false,
+		
+	[TIMETABLE_3]
+		"3) Tests on the predicate, auxiliary functions are in testTIMETABLEAux",
+	
+	/* Should return true since basic timetable has correct values */		
+		
+	[RequirementOne_1] 		
+		requirementOne(basicTimetable())= true,
+	
+	/* Should return false because departure time is before arrival time */
+	
+	[RequirementOne_2] 
+		let plan1 = mk_Plan("TramA",{mk_Trip("A",5,3), mk_Trip("B",10,20)}),
+			t = {plan1}				
+		in 	requirementOne(t) = false
+		end, 
+	
+	/* Should return true because values are between 0 and 60 */
+	
+	[RequirementTwo_1] 
+		let t = {mk_Plan("TramA",{mk_Trip("A",0,2)})},
+			plan = mk_Plan("TramA",{mk_Trip("A",0,2)})			
+		in 	requirementTwo(t) = true
+		end,
+	
+	/* Should return false because values are not between 0 and 60 */	
+	
+	[RequirementTwo_2] 
+		let t = {mk_Plan("TramA",{mk_Trip("A",61,62), mk_Trip("A",0,2)})}			
+		in  requirementTwo(t) = false
+		end, 
+		
+	/* Should return true because we have only one plan for TramA */
+	
+	[RequirementThree_1] 
+		requirementThree(basicTimetable()) = true,	
+	
+	/* Should return false because we have two plan for tram A */
+	
+	[RequirementThree_2] 
+		let plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("B",10,20)}),
+			plan2 = mk_Plan("TramA",{mk_Trip("B",1,5)}),
+			t = {plan1, plan2}				
+		in 	requirementThree(t) = false
+		end,				
+		
+	/* Should return true since all plans have trips */
+		
+	[RequirementFour_1]	
+		requirementFour(basicTimetable()) = true,
+	
+	/* Should return true since all plans have trips */
+	 
+	[RequirementFour_2]
+		let t = {mk_Plan("TramA",{})}
+		in 	requirementFour(t) = false
+		end,
+		
+	/* Should return true since all values of the basic time table are defined */
+	
+	[RequirementFive_1]
+		requirementFive(basicTimetable()) = true,
+	
+	/* Should return false since the first plan does not have a tram ID */
+		
+	[RequirementFive_2]
+		let	plan1 = mk_Plan("",{mk_Trip("A",0,2)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("E",1,5)}),
+			t = {plan1, plan2}			
+		in 	requirementFive(t) = false
+		end,
+		
+	/* Should return false since one trip does not have a stop ID */
+		
+	[RequirementFive_3]
+		let	plan1 = mk_Plan("TramA",{mk_Trip("",0,2)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("E",1,5)}),
+			t = {plan1, plan2}			
+		in 	requirementFive(t) = false
+		end,
+		
+	/* Should return true since all stops defined in trips are also defined in the net */
+	
+	[RequirementSix_1]
+		requirementSix(basicTimetable(), basicExample()) = true,
+		
+	/* Should return false since stop E is not defined in the net */
+	
+	[RequirementSix_2]
+		let	plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("E",1,5)}),
+			t = {plan1, plan2}			
+		in 	requirementSix(t, basicExample()) = false
+		end,
+		
+	/* Should return true since all stops of the net are used in the time table */
+	
+	[RequirementSeven_1]
+		requirementSeven(basicTimetable(), basicExample()) = true,
+	
+	/* Should return false since the stop D of the net is not used in the time table */
+	
+	[RequirementSeven_2]
+		let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2), mk_Trip("C",1,5)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+			t = {plan1, plan2}			
+		in requirementSeven(t, basicExample()) = false
+		end,
+		
+	/* Should return true since this example is respecting the stops capacities */
+	
+	[RequirementEight_1]
+		requirementEight(basicTimetable(), basicExample()) = true,
+		
+	/* Should return false since the capacity of C is 2 and there are 3 trams 
+	 * at the time 25 */	
+	
+	[RequirementEight_2]
+		let plan1 = mk_Plan("TramA",{mk_Trip("B",0,3), mk_Trip("C",15,20)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5), mk_Trip("C",12, 15)}),
+			plan3 = mk_Plan("TramC",{mk_Trip("C",12,22)}),
+			t = {plan1, plan2, plan3}
+		in  requirementEight(t, basicExample()) = false
+		end,
+		
+	/* Should return true since all connection implicitly defined in the time table are
+	 * also defined inside of the net */
+		
+	[RequirementNine_1]
+		requirementNine(basicTimetable(), basicExample()) = true,
+		 
+	/* Should return false since there is no connection between A and D */
+		 
+	[RequirementNine_2]
+		let plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("D",15,20)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+			t = {plan1, plan2}			
+		in  requirementNine(t, basicExample()) = false
+		end,
 								
-			[RequirementSix_1]
-				requirementSix(basicTimetable(), basicExample()) = true,
-			
-			/* Should return false since the minimum driving time between A and B is 
-			 * 10 and here the table tables gives a time of 7 */
-			
-			[RequirementSix_2]
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("B",10,20)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					t = {plan1, plan2}			
-				in requirementSix(t, basicExample()) = false
-				end,
-				
-			/* Should return true since this example is respecting the stops capacities */
-			
-			[RequirementSeven_1]
-				requirementSeven(basicTimetable(), basicExample()) = true,
-				
-			/* Should return false since the capacity of C is 2 and there are 3 trams 
-			 * at the time 25 */	
-			
-			[RequirementSeven_2]
-				let plan1 = mk_Plan("TramA",{mk_Trip("B",0,3), mk_Trip("C",15,20)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5), mk_Trip("C",12, 15)}),
-					plan3 = mk_Plan("TramC",{mk_Trip("C",12,22)}),
-					t = {plan1, plan2, plan3}
-				in  requirementSeven(t, basicExample()) = false
-				end,
-				
-			/* Should return true since the example respects the connection capacities */
-				
-			[RequirementEight_1]
-				requirementEight(basicTimetable(), basicExample()) = true, 
-			
-			/* Should return false since it does not respect the capacity (3) of B to C */
-			
-			[RequirementEight_2]
-				let plan1 = mk_Plan("TramA",{mk_Trip("B",0,3), mk_Trip("C",15,20)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5), mk_Trip("C",12, 15)}),
-					plan3 = mk_Plan("TramC",{mk_Trip("B",1,4), mk_Trip("C",15, 20)}),
-					t = {plan1, plan2, plan3}
-				in  requirementEight(t, basicExample()) = false
-				end,
-				
-			/* Should return true since the example respects the connection headways */
-				
-			[RequirementNine_1]
-				requirementNine(basicTimetable(), basicExample()) = true, 
-			
-			/* Should return false since the min headway between B and C is 4 and there
-			 * is only 2 minutes here */
-			
-			[RequirementNine_2]
-				let plan1 = mk_Plan("TramA",{mk_Trip("B",0,3), mk_Trip("C",15,20)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5), mk_Trip("C",12, 15)}),
-					t = {plan1, plan2}
-				in  requirementNine(t, basicExample()) = false
-				end,	
-			
-			/* Should return true since all stops defined in trips are also defined in the net */
-			
-			[RequirementTen_1]
-				requirementTen(basicTimetable(), basicExample()) = true,
-				
-			/* Should return false since stop E is not defined in the net */
-			
-			[RequirementTen_2]
-				let	plan1 = mk_Plan("TramA",{mk_Trip("A",0,2)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("E",1,5)}),
-					t = {plan1, plan2}			
-				in 	requirementTen(t, basicExample()) = false
-				end,
-			
-			/* Should return true since all stops of the net are used in the time table */
-			
-			[requirementEleven_1]
-				requirementEleven(basicTimetable(), basicExample()) = true,
-			
-			/* Should return false since the stop D of the net is not used in the time table */
-			
-			[RequirementEleven_2]
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,2), mk_Trip("C",1,5)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					t = {plan1, plan2}			
-				in requirementEleven(t, basicExample()) = false
-				end,
-				
-			/* Should return true since all connection implicitly defined in the time table are
-			 * also defined inside of the net */
-				
-			[RequirementTwelve_1]
-				requirementTwelve(basicTimetable(), basicExample()) = true,
-				 
-			/* Should return false since there is no connection between A and D */
-				 
-			[RequirementTwelve_2]
-				let plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("D",15,20)}),
-					plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
-					t = {plan1, plan2}			
-				in  requirementTwelve(t, basicExample()) = false
-				end
+	/* Should return true since the example respects the minimum driving time */
+						
+	[RequirementEleven_1]
+		requirementEleven(basicTimetable(), basicExample()) = true,
+	
+	/* Should return false since the minimum driving time between A and B is 
+	 * 10 and here the table tables gives a time of 7 */
+	
+	[RequirementEleven_2]
+		let plan1 = mk_Plan("TramA",{mk_Trip("A",0,3), mk_Trip("B",10,20)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5)}),
+			t = {plan1, plan2}			
+		in requirementEleven(t, basicExample()) = false
+		end,				
+	
+	/* Should return true since the example respects the connection capacities */
+		
+	[RequirementTwelve_1]
+		requirementTwelve(basicTimetable(), basicExample()) = true, 
+	
+	/* Should return false since it does not respect the capacity (3) of B to C */
+	
+	[RequirementTwelve_2]
+		let plan1 = mk_Plan("TramA",{mk_Trip("B",0,3), mk_Trip("C",15,20)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5), mk_Trip("C",12, 15)}),
+			plan3 = mk_Plan("TramC",{mk_Trip("B",1,4), mk_Trip("C",15, 20)}),
+			t = {plan1, plan2, plan3}
+		in  requirementTwelve(t, basicExample()) = false
+		end,
+		
+	/* Should return true since the example respects the connection headways */
+		
+	[RequirementThirteen_1]
+		requirementThirteen(basicTimetable(), basicExample()) = true, 
+	
+	/* Should return false since the min headway between B and C is 4 and there
+	 * is only 2 minutes here */
+	
+	[RequirementThirteen_2]
+		let plan1 = mk_Plan("TramA",{mk_Trip("B",0,3), mk_Trip("C",15,20)}),
+			plan2 = mk_Plan("TramB",{mk_Trip("B",1,5), mk_Trip("C",12, 15)}),
+			t = {plan1, plan2}
+		in  requirementThirteen(t, basicExample()) = false
+		end, 
+		
+	[IsWellFormed] 
+		isWellformed(basicTimetable(), basicExample()) = true
 end

@@ -197,7 +197,7 @@ class
 	    connectionStops(net) is 
 	   		~(exists c : Connection :- c isin Connections(net) /\ card Stops(c) ~= 2),
 	    
-	   	-- 5) Validity of the parameters of the connections	
+	   	-- 5) Validity of the parameters of connections	
 		validateConnections : Net -> Bool
 	 	validateConnections(net) is
 	  		~(exists c : Connection :- c isin Connections(net) /\ 
