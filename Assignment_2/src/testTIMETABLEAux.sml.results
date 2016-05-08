@@ -1,0 +1,20 @@
+[TIMETABLE_AUX] "Tests on auxiliary functions used for the time table predicate"
+[GetTripByATime_1] true
+[GetTripByATime_2] true
+[GetLastTripDepartureTime_1] true
+[GetLastTripDepartureTime_2] true
+[GetWaitingTrams] true
+[GetNextTrip_1] true
+[GetNextTrip_2] true
+[GetNextTrip_3] true
+[GetAllTrips_1] true
+[GetAllTrips_2] true
+[NextDepartureLoop] true
+[NextDeparture_1] true
+[NextDeparture_2] true
+[NextDeparture_3] true
+[CheckMinDrivingTime_1] true
+[CheckMinDrivingTime_2] true
+[getTramsInPlan_1] true
+[getTramsOn_1] true
+[getTramsOn_2] true

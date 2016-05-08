@@ -1,0 +1,38 @@
+[TIMETABLE_1] "1) Tests on the predicate and their auxiliary functions"
+[getPlanByTramId_1] true
+[getPlanByTramId_2] true
+[TIMETABLE_2] "2) Tests on the generators and their auxiliary functions"
+[addTram_1] true
+[isIn_1] true
+[isIn_2] true
+[addStop_1] true
+[addStop_2] true
+[stopIsIn_1] true
+[stopIsIn_2] true
+[TIMETABLE_3] "3) Tests on the predicate, auxiliary functions are in testTIMETABLEAux"
+[RequirementOne_1] true
+[RequirementOne_2] true
+[RequirementTwo_1] true
+[RequirementTwo_2] true
+[RequirementThree_1] true
+[RequirementThree_2] true
+[RequirementFour_1] true
+[RequirementFour_2] true
+[RequirementFive_1] true
+[RequirementFive_2] true
+[RequirementFive_3] true
+[RequirementSix_1] true
+[RequirementSix_2] true
+[RequirementSeven_1] true
+[RequirementSeven_2] true
+[RequirementEight_1] true
+[RequirementEight_2] true
+[RequirementNine_1] true
+[RequirementNine_2] true
+[RequirementEleven_1] true
+[RequirementEleven_2] true
+[RequirementTwelve_1] true
+[RequirementTwelve_2] true
+[RequirementThirteen_1] true
+[RequirementThirteen_2] true
+[IsWellFormed] true
